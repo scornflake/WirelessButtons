@@ -1,19 +1,43 @@
 
 #include <bluefruit.h>
 #include <RotaryEncoder.h>
+
+#include "vars.h"
 #include "buttonhid.h"
 
-#define DEBUG_BUTTON_PRESSES 1
-#define NUMBER_OF_ENCODERS 2
-
-class SWBEncoderWithHold : HwRotaryEncoder
+class SWBEncoderWithHold : public SwRotaryEncoder
 {
 public:
-  SWBEncoderWithHold(int holdInMs = 25) : _msTime(holdInMs) {}
+  SWBEncoderWithHold(int holdInMs = 25) : _msTime(holdInMs), _lastValue(0) {}
+
+  int readWithHold()
+  {
+    int value = read();
+    if (value != 0)
+    {
+      // start the timer
+      sawValueAtMillis = millis();
+    }
+
+    if (sawValueAtMillis > 0)
+    {
+      unsigned long diff = millis() - sawValueAtMillis;
+      if (diff > _msTime)
+      {
+        value = 0;
+      }
+    }
+
+    _lastValue = value;
+    return value;
+  }
+
+  int lastValue() { return _lastValue; }
 
 private:
-  HwRotaryEncoder encoder;
   uint8_t _msTime;
+  int _lastValue;
+  unsigned long sawValueAtMillis;
 };
 
 class SWBButtonPlate
@@ -33,7 +57,11 @@ public:
 
     // Set max power. Accepted values are: -40, -30, -20, -16, -12, -8, -4, 0, 4
     Bluefruit.setTxPower(0);
+#ifdef PRODUCTION
     Bluefruit.setName("Button Masher");
+#else
+    Bluefruit.setName("Btn Mash Debug");
+#endif
 
     // Configure and Start Device Information Service
     bledis.setManufacturer("shinywhitebox");
@@ -49,21 +77,57 @@ public:
 
   void setupButtonInputs()
   {
+#ifdef DEBUG
+    Serial.print("Using as input: ");
+#endif
+
     for (int i = 0; i < NUM_BUTTONS; i++)
     {
       if (isMappedButton(i))
       {
         pinMode(portForButtonNumber(i), INPUT_PULLUP);
+#ifdef DEBUG
+        Serial.printf("%d, ", portForButtonNumber(i));
+#endif
       }
     }
+#ifdef DEBUG
+    Serial.println();
+#endif
 
-    if(NUMBER_OF_ENCODERS > 0) {
-      for(int i = 0; i < NUMBER_OF_ENCODERS; i++) {
-        int *pins = encoders[i];
+    if (NUMBER_OF_ENCODERS > 0)
+    {
+      for (int i = 0; i < NUMBER_OF_ENCODERS; i++)
+      {
+        int *pins = encoderButtons[i];
+#ifdef DEBUG
         Serial.printf("Encoder #%d uses buttons %d,%d", i, pins[0], pins[1]);
         Serial.println();
+#endif
+        encoders[i].begin(portForButtonNumber(pins[0]), portForButtonNumber(pins[1]));
+        //encoders[i].start();
       }
     }
+  }
+
+  int numberOfEncoders()
+  {
+    return NUMBER_OF_ENCODERS;
+  }
+
+  bool pollEncoders()
+  {
+    bool encoderDidChange = false;
+    for (int idx = 0; idx < NUMBER_OF_ENCODERS; idx++)
+    {
+      int result = encoders[idx].readWithHold();
+
+      // set the left/right button state
+      encoderDidChange |= setButtonState(encoderButtons[idx][0], result == -1);
+      encoderDidChange |= setButtonState(encoderButtons[idx][1], result == 1);
+    }
+
+    return encoderDidChange;
   }
 
   bool isMappedButton(int buttonNumber)
@@ -75,12 +139,22 @@ public:
   {
     for (int i = 0; i < NUMBER_OF_ENCODERS; i++)
     {
-      int *encoderButtons = &encoders[i][0];
-      if(encoderButtons[0] == buttonNumber || encoderButtons[1] == buttonNumber) {
+      if (encoderButtons[i][0] == buttonNumber || encoderButtons[i][1] == buttonNumber)
+      {
         return true;
       }
     }
     return false;
+  }
+
+  bool isButtonPressed(int buttonNumber)
+  {
+    int port = portForButtonNumber(buttonNumber);
+    if (port == 20)
+    {
+      // DFU
+    }
+    return digitalRead(port) == LOW;
   }
 
   int portForButtonNumber(uint8_t buttonNumber)
@@ -98,7 +172,7 @@ public:
       int existingValue = (_state.buttons[arrayIndex] >> arrayOffset) & 0x1;
       if (existingValue != state)
       {
-#ifdef DEBUG_BUTTON_PRESSES
+#ifdef DEBUG_BUTTON_PRESSES &&DEBUG
         Serial.printf("Setting button %d (port %d)", buttonNumber, portForButtonNumber(buttonNumber));
         Serial.printf(", array: %d offset %d", arrayIndex, arrayOffset);
         Serial.print(", to state: ");
@@ -134,7 +208,6 @@ private:
     Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
     Bluefruit.Advertising.addTxPower();
     Bluefruit.Advertising.addAppearance(BLE_APPEARANCE_HID_GAMEPAD);
-    // Bluefruit.Advertising.addAppearance(BLE_APPEARANCE_HID_MOUSE);
 
     // Include BLE HID service
     Bluefruit.Advertising.addService(hid);
@@ -160,13 +233,12 @@ private:
 private:
   SWBButtonHid hid; // 24 buttons over BLE
   BLEDis bledis;
-  SWBEncoderWithHold encoderOne();
-  SWBEncoderWithHold encoderTwo();
+  SWBEncoderWithHold encoders[NUMBER_OF_ENCODERS];
   hid_button_masher_t _state;
 
   // Encoder button numbers (easier to read!)
   // [x][y], where x  = encoder number, y = button number
-  int encoders[NUMBER_OF_ENCODERS][2] = {{5, 7}, {14, 15}};
+  int encoderButtons[NUMBER_OF_ENCODERS][2] = {{5, 7}, {14, 15}};
 
   //  Button 'integer' numbers (0-19) => pin input ports
   int buttonToPortMap[NUM_BUTTONS] = {

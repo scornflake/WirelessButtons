@@ -3,10 +3,6 @@
 
 #include <bluefruit.h>
 
-// Number of buttons you want see (make this a multiple of 8 ideally)
-// If you make it more/less, you need to adjust the hid_button_masher_t type
-#define NUM_BUTTONS 24
-
 enum
 {
     REPORT_ID_KEYBOARD = 1,
@@ -37,9 +33,7 @@ uint8_t const hid_report_descriptor2[] =
         HID_REPORT_SIZE(1),
         HID_INPUT(HID_CONSTANT | HID_VARIABLE | HID_ABSOLUTE),
 
-
-        HID_COLLECTION_END
-        };
+        HID_COLLECTION_END};
 
 typedef ATTR_PACKED_STRUCT(struct)
 {
@@ -61,13 +55,14 @@ class SWBButtonHid : public BLEHidGeneric
         setReportMap(hid_report_descriptor2, sizeof(hid_report_descriptor2));
         VERIFY_STATUS(BLEHidGeneric::begin());
 
+#ifdef DEBUG
         Serial.print("Setting up for: ");
         Serial.print(_num_input);
         Serial.println(" inputs.");
         Serial.print("HID report is: ");
         Serial.print(sizeof(hid_button_masher_t));
         Serial.println(" in length");
-
+#endif
         // Attempt to change the connection interval to 11.25-15 ms when starting HID
         Bluefruit.setConnInterval(9, 12);
         return ERROR_NONE;
@@ -78,6 +73,5 @@ class SWBButtonHid : public BLEHidGeneric
         return inputReport(REPORT_ID_GAMEPAD, state, sizeof(hid_button_masher_t));
     }
 };
-
 
 #endif

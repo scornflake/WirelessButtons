@@ -2,16 +2,9 @@
 
 const int BATTERY_LED_PIN[3] = {21, 20, 3}; //R,G,B
 
+#include "vars.h"
 #include "buttonhid.h"
 #include "buttonplate.h"
-
-// Battery monitoring
-#define VBATPIN 31
-#define MONITOR_BATTERY 0
-
-// Encoders
-#define ENCODER_1_PIN1 27
-#define ENCODER_1_PIN2 30
 
 // Running state
 float lastVoltage = -10.0;
@@ -30,56 +23,61 @@ float batteryLevel()
 
 void setup()
 {
+
+#ifndef PRODUCTION
   Serial.begin(115200);
   while (!Serial)
     delay(10); // for nrf52840 with native usb
+#endif
 
-  Serial.println("Neils Fake Buttons");
-  Serial.println("------------------\n");
+  delay(100);
+
+#ifdef DEBUG
+  Serial.println("Neils Button Masher");
+  Serial.println("-------------------\n");
+#endif
 
   plate.setupButtonPlate();
-
-  // encoderOne.begin(ENCODER_1_PIN1, ENCODER_1_PIN2);
-  // encoderOne.setCallback(reportEncoder);
-  // encoderOne.setReporter(1);
-  // encoderOne.start();
 }
 
 void loop()
 {
-
-  // int encoderResult = encoderOne.read();
-  // if (encoderResult)
-  // {
-  //   Serial.print("Emcoder changed to: ");
-  //   Serial.println(encoderResult);
-  // }
-
   if (MONITOR_BATTERY)
   {
     float currentVolts = batteryLevel();
     if (fabs(currentVolts - lastVoltage) > 0.01)
     {
+#ifdef DEBUG_MONITOR_BATTERY
       Serial.print("Voltage: ");
       Serial.println(currentVolts, 3);
+#endif
       lastVoltage = currentVolts;
     }
   }
 
   bool sendNewState = false;
+
+  // check buttons
   for (int btnNumber = 0; btnNumber < NUM_BUTTONS; btnNumber++)
   {
     if (plate.isEncoderButton(btnNumber))
       continue;
     if (!plate.isMappedButton(btnNumber))
       continue;
-    int port = plate.portForButtonNumber(btnNumber);
-    bool currentState = digitalRead(port) == LOW;
+    bool currentState = plate.isButtonPressed(btnNumber);
     sendNewState |= plate.setButtonState(btnNumber, currentState);
   }
+
+  // check Encoders
+  sendNewState |= plate.pollEncoders();
 
   if (sendNewState)
   {
     plate.sendInputs();
+  }
+
+  if (__loopDelayInMs > 0)
+  {
+    delay(__loopDelayInMs);
   }
 }
