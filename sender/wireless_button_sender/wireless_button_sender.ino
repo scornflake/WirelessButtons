@@ -24,15 +24,11 @@ float batteryLevel()
 void setup()
 {
 
-#ifndef PRODUCTION
+#ifdef DEBUG
   Serial.begin(115200);
   while (!Serial)
     delay(10); // for nrf52840 with native usb
-#endif
 
-  delay(100);
-
-#ifdef DEBUG
   Serial.println("Neils Button Masher");
   Serial.println("-------------------\n");
 #endif

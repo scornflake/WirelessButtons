@@ -35,11 +35,7 @@ uint8_t const hid_report_descriptor2[] =
 
         HID_COLLECTION_END};
 
-typedef ATTR_PACKED_STRUCT(struct)
-{
-    uint8_t buttons[3];
-}
-hid_button_masher_t;
+
 
 class SWBButtonHid : public BLEHidGeneric
 {

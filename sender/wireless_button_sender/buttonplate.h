@@ -85,9 +85,10 @@ public:
     {
       if (isMappedButton(i))
       {
-        pinMode(portForButtonNumber(i), INPUT_PULLUP);
+        int port = portForButtonNumber(i);        
+        pinMode(port, INPUT_PULLUP);
 #ifdef DEBUG
-        Serial.printf("%d, ", portForButtonNumber(i));
+        Serial.printf("%d, ", port);
 #endif
       }
     }
