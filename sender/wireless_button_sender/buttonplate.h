@@ -106,6 +106,9 @@ public:
         Serial.println();
 #endif
         encoders[i].begin(portForButtonNumber(pins[0]), portForButtonNumber(pins[1]));
+
+        // only needed for HwRotaryEncoder, which I decided not to use 
+        // when I was debugging the weirdness. Not sure Hw was the cause.
         //encoders[i].start();
       }
     }
