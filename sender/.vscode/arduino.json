@@ -1,0 +1,6 @@
+{
+    "port": "/dev/cu.SLAB_USBtoUART",
+    "board": "adafruit:nrf52:feather52832",
+    "configuration": "softdevice=s132v6,debug=l0",
+    "sketch": "wireless_button_sender/wireless_button_sender.ino"
+}

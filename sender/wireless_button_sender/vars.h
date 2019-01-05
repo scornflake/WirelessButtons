@@ -5,7 +5,7 @@
 // Its needed to NOT wait for Serial to appear, if in prod
 //
 // This should be defined, if building for the real button plate.
-#define PRODUCTION 1
+//#define PRODUCTION 1
 
 #ifndef PRODUCTION
 #define DEBUG 1

@@ -4,5 +4,5 @@
     "port": "COM8",
     "output": "../ArduinoOutput",
     "programmer": "AVRISP mkII",
-    "sketch": "sender\\wireless_button_sender\\wireless_button_sender.ino"
+    "sketch": "tests/matrix/matrix.ino"
 }

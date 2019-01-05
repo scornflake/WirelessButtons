@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "/Users/neil/Documents/Arduino/libraries/Keypad/src",
+                "/Users/neil/Library/Arduino15/packages/adafruit/tools/**",
+                "/Users/neil/Library/Arduino15/packages/adafruit/hardware/nrf52/0.9.1/**"
+            ],
+            "forcedInclude": [],
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ],
+            "intelliSenseMode": "clang-x64",
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
