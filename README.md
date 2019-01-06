@@ -1,4 +1,8 @@
 Neils "wireless buttons of doom" project.
+=========================================
+
+![Huzzah!](https://raw.githubusercontent.com/scornflake/WirelessButtons/master/images/no_wires.jpg)
+
 Well. Buttons yes, hopefully not so much of the 'doom' part!
 
 Backgrouund
