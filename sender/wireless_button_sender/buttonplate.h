@@ -1,6 +1,9 @@
 
 #include <bluefruit.h>
 #include <RotaryEncoder.h>
+// For the matrix keypad
+#include <Key.h>
+#include <Keypad.h>
 
 #include "vars.h"
 #include "buttonhid.h"
@@ -81,17 +84,18 @@ public:
     Serial.print("Using as input: ");
 #endif
 
-    for (int i = 0; i < NUM_BUTTONS; i++)
-    {
-      if (isMappedButton(i))
-      {
-        int port = portForButtonNumber(i);        
-        pinMode(port, INPUT_PULLUP);
-#ifdef DEBUG
-        Serial.printf("%d, ", port);
-#endif
-      }
-    }
+    keypad = new Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+//     for (int i = 0; i < NUM_BUTTONS; i++)
+//     {
+//       if (isMappedButton(i))
+//       {
+//         int port = portForButtonNumber(i);
+//         pinMode(port, INPUT_PULLUP);
+// #ifdef DEBUG
+//         Serial.printf("%d, ", port);
+// #endif
+//       }
+//     }
 #ifdef DEBUG
     Serial.println();
 #endif
@@ -107,7 +111,7 @@ public:
 #endif
         encoders[i].begin(portForButtonNumber(pins[0]), portForButtonNumber(pins[1]));
 
-        // only needed for HwRotaryEncoder, which I decided not to use 
+        // only needed for HwRotaryEncoder, which I decided not to use
         // when I was debugging the weirdness. Not sure Hw was the cause.
         //encoders[i].start();
       }
@@ -117,6 +121,44 @@ public:
   int numberOfEncoders()
   {
     return NUMBER_OF_ENCODERS;
+  }
+
+  bool pollButtons()
+  {
+    String msg = "";
+    bool buttonStateChanged = false;
+    if (keypad)
+    {
+      if (keypad->getKeys())
+      {
+        for (int i = 0; i < LIST_MAX; i++)
+        {
+          if (keypad->key[i].stateChanged)
+          {
+            switch (keypad->key[i].kstate)
+            {
+            case PRESSED:
+              msg = "Pressed";
+              break;
+            case RELEASED:
+              msg = "Released";
+              break;
+            default:
+              msg = "";
+              break;
+            }
+            if (msg.length())
+            {
+              buttonStateChanged = true;
+              Serial.print(msg);
+              Serial.printf("%c", keypad->key[i].kchar);
+              Serial.println();
+            }
+          }
+        }
+      }
+    }
+    return buttonStateChanged;
   }
 
   bool pollEncoders()
@@ -239,6 +281,7 @@ private:
   BLEDis bledis;
   SWBEncoderWithHold encoders[NUMBER_OF_ENCODERS];
   hid_button_masher_t _state;
+  Keypad *keypad = 0;
 
   // Encoder button numbers (easier to read!)
   // [x][y], where x  = encoder number, y = button number

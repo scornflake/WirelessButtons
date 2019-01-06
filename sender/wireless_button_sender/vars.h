@@ -1,6 +1,7 @@
 #ifndef __MASHER_VARS_
 #define __MASHER_VARS_
 
+
 // Comment this out if in dev, so that you can see Serial output.
 // Its needed to NOT wait for Serial to appear, if in prod
 //
@@ -20,6 +21,22 @@
 // Adds a delay in loop(), so that the entire thing uses less power
 // If set to 0, no delay() is called
 const int __loopDelayInMs = 0;
+
+/* MATRIX */
+
+// Our wheel has 16 buttons and 2 encoders (they take 4 inputs)
+// Define a 4x4 matrix (for the 16 buttons)
+const byte ROWS = 4; //four rows
+const byte COLS = 4; //three columns
+char keys[ROWS][COLS] = {
+    {'1', '2', '3', '4'},
+    {'5', '6', '7', '8'},
+    {'9', 'a', 'b', 'c'},
+    {'d', 'e', 'f', 'g'}};
+byte rowPins[ROWS] = {2, 3, 4, 5};     //connect to the row pinouts of the kpd
+byte colPins[COLS] = {28, 29, 12, 13}; //connect to the column pinouts of the kpd
+
+/* ORIGINAL */
 
 /*
 ** Vars affecting # of buttons reported over HID.

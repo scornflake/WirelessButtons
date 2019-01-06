@@ -54,15 +54,16 @@ void loop()
   bool sendNewState = false;
 
   // check buttons
-  for (int btnNumber = 0; btnNumber < NUM_BUTTONS; btnNumber++)
-  {
-    if (plate.isEncoderButton(btnNumber))
-      continue;
-    if (!plate.isMappedButton(btnNumber))
-      continue;
-    bool currentState = plate.isButtonPressed(btnNumber);
-    sendNewState |= plate.setButtonState(btnNumber, currentState);
-  }
+  sendNewState = plate.pollButtons();
+  // for (int btnNumber = 0; btnNumber < NUM_BUTTONS; btnNumber++)
+  // {
+  //   if (plate.isEncoderButton(btnNumber))
+  //     continue;
+  //   if (!plate.isMappedButton(btnNumber))
+  //     continue;
+  //   bool currentState = plate.isButtonPressed(btnNumber);
+  //   sendNewState |= plate.setButtonState(btnNumber, currentState);
+  // }
 
   // check Encoders
   sendNewState |= plate.pollEncoders();
