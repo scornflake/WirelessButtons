@@ -31,6 +31,8 @@ Answer: so we can be efficient. While it is possible to have 20 odd inputs for t
 If you wanted to (as I did) have an LED for battery status: you're out of luck.
 Enter '[matrix keyboards](https://www.baldengineer.com/arduino-keyboard-matrix-tutorial.html)'. While the wiring is more complex, the result is you can use a 4x4 matrix to get 16 inputs, leaving loads of pins available for other things. Like lights! Lights are shiny. We like lights.
 
+![Row & Column Wiring](https://raw.githubusercontent.com/scornflake/WirelessButtons/master/images/IMG_4721.jpg)
+
 Here's the (pinout for the Feather](https://learn.adafruit.com/bluefruit-nrf52-feather-learning-guide/device-pinout).
 
 My Wiring
