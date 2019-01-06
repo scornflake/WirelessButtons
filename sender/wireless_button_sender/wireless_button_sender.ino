@@ -66,7 +66,7 @@ void loop()
   // }
 
   // check Encoders
-  sendNewState |= plate.pollEncoders();
+  // sendNewState |= plate.pollEncoders();
 
   if (sendNewState)
   {

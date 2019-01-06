@@ -28,11 +28,12 @@ const int __loopDelayInMs = 0;
 // Define a 4x4 matrix (for the 16 buttons)
 const byte ROWS = 4; //four rows
 const byte COLS = 4; //three columns
-char keys[ROWS][COLS] = {
-    {'1', '2', '3', '4'},
-    {'5', '6', '7', '8'},
-    {'9', 'a', 'b', 'c'},
-    {'d', 'e', 'f', 'g'}};
+char keys[ROWS * COLS] = {
+    0,1,2,3,
+    4,5,6,7,
+    8,9,10,11,
+    12,13,14,15
+};
 byte rowPins[ROWS] = {2, 3, 4, 5};     //connect to the row pinouts of the kpd
 byte colPins[COLS] = {28, 29, 12, 13}; //connect to the column pinouts of the kpd
 
@@ -45,7 +46,7 @@ byte colPins[COLS] = {28, 29, 12, 13}; //connect to the column pinouts of the kp
 
 // The number of rotary encoders on the button plate
 // SWBButtonPlate.encoderButtons is directly affected.
-#define NUMBER_OF_ENCODERS 2
+#define NUMBER_OF_ENCODERS 0
 
 // Number of buttons you want see (this must be a multiple of 8)
 // If you make it more/less, you need to adjust the hid_button_masher_t type

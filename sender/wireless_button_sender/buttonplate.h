@@ -125,7 +125,6 @@ public:
 
   bool pollButtons()
   {
-    String msg = "";
     bool buttonStateChanged = false;
     if (keypad)
     {
@@ -138,21 +137,25 @@ public:
             switch (keypad->key[i].kstate)
             {
             case PRESSED:
-              msg = "Pressed";
-              break;
             case RELEASED:
-              msg = "Released";
-              break;
-            default:
-              msg = "";
-              break;
-            }
-            if (msg.length())
             {
               buttonStateChanged = true;
+              /* I decided to use 'int' values for the keymap.
+              This means I can just cast to an int, and use that directly in a call to setButtonState 
+              */
+              uint8_t buttonNumber = (int)keypad->key[i].kchar;
+              setButtonState(buttonNumber, keypad->key[i].kstate == PRESSED ? true : false);
+              buttonStateChanged = true;
+
+#ifdef DEBUG
+              String msg = keypad->key[i].kstate == PRESSED ? "Pressed" : "Released";
               Serial.print(msg);
-              Serial.printf("%c", keypad->key[i].kchar);
+              Serial.printf(" button number %d", buttonNumber);
               Serial.println();
+#endif
+            }
+            default:
+              break;
             }
           }
         }
@@ -285,7 +288,8 @@ private:
 
   // Encoder button numbers (easier to read!)
   // [x][y], where x  = encoder number, y = button number
-  int encoderButtons[NUMBER_OF_ENCODERS][2] = {{5, 7}, {14, 15}};
+  int encoderButtons[0][0];
+  // int encoderButtons[NUMBER_OF_ENCODERS][2] = {{5, 7}, {14, 15}};
 
   //  Button 'integer' numbers (0-19) => pin input ports
   int buttonToPortMap[NUM_BUTTONS] = {
