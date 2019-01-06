@@ -5,8 +5,8 @@ Neils "wireless buttons of doom" project.
 
 Well. Buttons yes, hopefully not so much of the 'doom' part!
 
-Backgrouund
------------
+Background
+----------
 
 I had a wired wheel with 16 buttons, 2 shifters and 2 rotary encoders. 
 I'd originally built it for road racing (iRacing), and that worked fine for a couple of years. As I began to get into dirt, the cord started getting in the way.
