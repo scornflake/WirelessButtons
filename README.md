@@ -16,7 +16,8 @@ I looked around for existing stuff, and found a project that used 2 Arduinos in 
 
 After hunting a bit I found the [adafruit feather](https://www.adafruit.com/product/3406).
 This looked promising as it was an Arduino, and BLE, with Lipo charger, in a single unit.
-I figured I could expose the wheel as a HID device directly over BLE, which is what I ended up doing.
+
+What this project does is make the wheel appear as a Joystick device directly over BLE.
 
 Parts
 -----
@@ -24,7 +25,8 @@ Parts
  - 18 x Signal Diodes (one per button)
  - A whole bunch of wire
  - The ability to solder :)
-   - Soldering iron!
+   - Soldering iron! 
+ - Maybe a separate lipo charger (for convenience)
 
 
 Diodes? Wot?
@@ -94,12 +96,19 @@ Changing the number of buttons
 - Change ROWS/COLS to be whatever works for your wiring.
 - keys[ROWS * COLS] to have consecutive integers, starting at 0.
 
+Charging
+--------
 
- Debug vs Production
- -------------------
+I had originally intended to have TWO of the Arduino units - the 2nd acting as a charger. In the end I decided to get a simple USB 1s Lipo charger. They are cheap (couple of bucks). Something like [this](https://www.aliexpress.com/item/SiMR-New-Arrival-5-in-1-Lipo-Battery-Charger-USB-Interface-Charging-Devices-for-SYMA-X5C/32810329324.html)
 
- There's a very important #define in vars.h.
- The one that reads:
+You could of course also make the USB port of the Feather accessible, and plug a cord directly into it when not in use.
+
+
+Debug vs Production
+-------------------
+
+There's a very important #define in vars.h.
+The one that reads:
 
 ```
 #define PRODUCTION 1
