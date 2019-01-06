@@ -1,25 +1,13 @@
-#include <bluefruit.h>
 
-const int BATTERY_LED_PIN[3] = {21, 20, 3}; //R,G,B
+#include <bluefruit.h>
 
 #include "vars.h"
 #include "buttonhid.h"
 #include "buttonplate.h"
-
-// Running state
-float lastVoltage = -10.0;
-bool buttonPressed = false;
+#include "battery.h"
 
 SWBButtonPlate plate;
-
-float batteryLevel()
-{
-  float measured = analogRead(VBATPIN);
-  measured *= 2; // cos adafruit say so
-  measured *= 3.3;
-  measured /= 1024;
-  return measured;
-}
+DoomBatteryMonitor batteryMonitor(VBATPIN, (int*)&BATTERY_LED_PIN[0], 1000, MOCK_BATTERY);
 
 void setup()
 {
@@ -39,22 +27,12 @@ void setup()
 #endif
 
   plate.setupButtonPlate();
+  batteryMonitor.setup();
 }
 
 void loop()
 {
-  if (MONITOR_BATTERY)
-  {
-    float currentVolts = batteryLevel();
-    if (fabs(currentVolts - lastVoltage) > 0.01)
-    {
-#ifdef DEBUG_MONITOR_BATTERY
-      Serial.print("Voltage: ");
-      Serial.println(currentVolts, 3);
-#endif
-      lastVoltage = currentVolts;
-    }
-  }
+  batteryMonitor.monitor();
 
   bool sendNewState = false;
 

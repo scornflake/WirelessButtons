@@ -1,26 +1,13 @@
 
 #include <bluefruit.h>
 #include <RotaryEncoder.h>
+
 // For the matrix keypad
 #include <Key.h>
 #include <Keypad.h>
 
 #include "vars.h"
 #include "buttonhid.h"
-
-struct EncoderConfig
-{
-  int pins[2];
-  int buttonNumbers[2];
-
-  EncoderConfig(int pin1, int pin2, int buttonOne, int buttonTwo)
-  {
-    pins[0] = pin1;
-    pins[1] = pin2;
-    buttonNumbers[0] = buttonOne;
-    buttonNumbers[1] = buttonTwo;
-  }
-};
 
 class SWBEncoderWithHold : public SwRotaryEncoder
 {
@@ -261,10 +248,4 @@ private:
   SWBEncoderWithHold encoders[NUMBER_OF_ENCODERS];
   hid_button_masher_t _state;
   Keypad *keypad = 0;
-
-  // Encoder button numbers (easier to read!)
-  // [x][y], where x  = encoder number, y = pin number
-  EncoderConfig encoderConfiguration[NUMBER_OF_ENCODERS] = {
-      EncoderConfig(14, 11, 16, 17),
-      EncoderConfig(30, 27, 18, 19)};
 };

@@ -15,6 +15,7 @@ Grr. Cord be gone!
 I looked around for existing stuff, and found a project that used 2 Arduinos in I think UART mode. The idea was you preconfigured them to talk to each other, and exposed one of them as a Joystick device on the PC. I'd list the project here but I can't find it again.
 
 After hunting a bit I found the [adafruit feather](https://www.adafruit.com/product/3406).
+Docs and such for this board are here: https://learn.adafruit.com/bluefruit-nrf52-feather-learning-guide/introduction.
 This looked promising as it was an Arduino, and BLE, with Lipo charger, in a single unit.
 
 What this project does is make the wheel appear as a Joystick device directly over BLE.
