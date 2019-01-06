@@ -28,8 +28,10 @@ const int __loopDelayInMs = 1;
 
 // Our wheel has 16 buttons and 2 encoders (they take 4 inputs)
 // Define a 4x4 matrix (for the 16 buttons)
-const byte ROWS = 4; //four rows
-const byte COLS = 4; //three columns
+const byte ROWS = 4; 
+const byte COLS = 4; 
+
+/* CHANGE THIS IF YOU CHANGE NUMBER_OF_BUTTONS */
 char keys[ROWS * COLS] = {
     0, 1, 2, 3,
     4, 5, 6, 7,
@@ -47,7 +49,6 @@ byte colPins[COLS] = {28, 29, 12, 13}; //connect to the column pinouts of the kp
 
 // The number of rotary encoders on the button plate
 // SWBButtonPlate.encoderConfiguration is directly affected.
-#define NUMBER_OF_ENCODERS 2
 
 // Number of buttons you want see (this must be a multiple of 8)
 // If you make it more/less, you need to adjust the hid_button_masher_t type

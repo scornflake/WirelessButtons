@@ -32,11 +32,19 @@ If you wanted to (as I did) have an LED for battery status: you're out of luck.
 Enter '[matrix keyboards](https://www.baldengineer.com/arduino-keyboard-matrix-tutorial.html)'. While the wiring is more complex, the result is you can use a 4x4 matrix to get 16 inputs, leaving loads of pins available for other things. Like lights! Lights are shiny. We like lights.
 
 Here's the (pinout for the Feather](https://learn.adafruit.com/bluefruit-nrf52-feather-learning-guide/device-pinout).
-I used A0-A3 for my 'rows' and A4-A7 for the 'columns'.
 
-I used the diagram from [Bald Engineer | Matrix Keyboard](https://www.baldengineer.com/wp-content/uploads/2017/12/Ghosting-Example.jpg) when wiring things up.
+My Wiring
+---------
+ - I used A0-A3 for my 'rows' and A4-A7 for the 'columns'.
 
-I then used the [Keypad](https://github.com/Chris--A/Keypad) library to read the matrix.
+![Row & Column Wiring](https://raw.githubusercontent.com/scornflake/WirelessButtons/master/images/IMG_4721.jpg)
+
+ - Encoder 1 uses pins 14,11
+ - Encoder 2 uses pins 30,27
+ 
+ 
+Re matrix wiring, I used the diagram from [Bald Engineer | Matrix Keyboard](https://www.baldengineer.com/wp-content/uploads/2017/12/Ghosting-Example.jpg) as a reference. I then used the [Keypad](https://github.com/Chris--A/Keypad) arduino library to read the matrix.
+
 
 
 Limitations / Set up for your situation
@@ -48,13 +56,42 @@ It's easy enough to change tho ... after a bit of explanation and learning on yo
 
 Here's what's important to know:
  - vars.h contains most of the configuration. Go there first.
+ - "pinouts" for your ROWS/COLS of the matrix are in rowPins and colPins respectively.
+ - "button numbers" start at 0. All push buttons in the matrix are assumed to come before anyting else. Matrix encoder outputs should begin at NUMBER_OF_BUTTONS + 1.
  - buttonplate.h (go to the bottom!!!), contains the rest. Specifically: encoderConfiguration.
    -  EncoderConfig(14, 11, 16, 17) means:
     - Use pins 14, 11 for encoder input.
-    - Use *button* 16 as left, *button* 17 as right. (bits 15 and 16 in the HID output)
+    - Use *button* 16 as left, *button* 17 as right. (bits 15 and 16 in the HID output). This works for the first encoder because my buttons take numbers 0->15.  The 2nd encoder uses buttons 18 & 19, and so on (if you had more encoders).
     - If you change the number of encoders you have to change this definition.    
- - It seems HID inputs must be a multiple of 8 bits. Things didn't work for me otherwise. I'm no HID Expert, so I just made everything a multiple of 8 and got on with it.  *If you're going to change the number of buttons, this is something to keep in mind. The code already more or less takes care of this for you*.
+ - It seems HID inputs must be a multiple of 8 bits. Things didn't work for me otherwise. I'm no HID expert, so I just made everything a multiple of 8 and got on with it.  *If you're going to change the number of buttons, this is something to keep in mind. The code already more or less takes care of this for you*.
  - Rotary Encoders are *manually configured* to appear as buttons.  So if you change the number of buttons, you might need to change the encoder button numbers as well.
+ - Don't hook a rotary encoder output to RXD/TXD (pins 8 & 6) of the feather. Depending on the encoder position, it'll stop you being able to upload new sketches to the unit.
+
+Pins Warning
+------------
+- 31 is for reading lipo voltage. Don't use it for an input. 
+- Unsure if this matters for inputs, but the docs say that SCL/SDA don't have pull-up resistors. They seemed to work, but when I implemented the matrix input, I no longer needed them and avoided them.
+- Maybe avoid pin 20 (DFU). If it's tied LOW it'll reset/wipe the device. Basically, go read the pinouts doc for the feather. There's lots of useful info there about pins to watch out for.
+
+Changing the number of buttons
+------------------------------
+- Change NUMBER_OF_BUTTONS in vars.h
+- Change ROWS/COLS to be whatever works for your wiring.
+- keys[ROWS * COLS] to have consecutive integers, starting at 0.
+
+
+ Debug vs Production
+ -------------------
+
+ There's a very important #define in vars.h.
+ The one that reads:
+
+```
+#define PRODUCTION 1
+```
+
+If this is defined, there'll be NO DEBUG sent to Serial.
+Comment this out if you're debugging/changing stuff. You'll get a sensible summary and also notifications when buttons are pressed/released.
 
 
 I don't have any encoders
