@@ -1,4 +1,5 @@
 Neils "wireless buttons of doom" project.
+Well. Buttons yes, hopefully not so much of the 'doom' part!
 
 Backgrouund
 -----------
@@ -16,7 +17,7 @@ I figured I could expose the wheel as a HID device directly over BLE, which is w
 Parts
 -----
  - 1 x [Feather BLE](https://www.adafruit.com/product/3406) (I used the no-pins one)
- - 18 x Signal Diodes
+ - 18 x Signal Diodes (one per button)
  - A whole bunch of wire
  - The ability to solder :)
    - Soldering iron!
@@ -25,15 +26,15 @@ Parts
 Diodes? Wot?
 ------------
 What's the reason for the diodes I hear you ask?
-Answer: so we can be efficient. While it is possible to have 20 odd inputs (for 16 buttons + 2 encoders) you don't have anything left.  Ask me how I know.
+Answer: so we can be efficient. While it is possible to have 20 odd inputs for the 16 buttons & 2 encoders, you won't have anything left for 'other stuff'.  Ask me how I know.
 
-If you wanted to (as I did) have an LED for battery status. You're out of luck.
-Enter 'matrix keyboards'. While the wiring is more complex, the result is you can use a 4x4 matrix to get 16 inputs, leaving loads of pins available for other things. Like lights! Lights are shiny. We like lights.
+If you wanted to (as I did) have an LED for battery status: you're out of luck.
+Enter '[matrix keyboards](https://www.baldengineer.com/arduino-keyboard-matrix-tutorial.html)'. While the wiring is more complex, the result is you can use a 4x4 matrix to get 16 inputs, leaving loads of pins available for other things. Like lights! Lights are shiny. We like lights.
 
 Here's the (pinout for the Feather](https://learn.adafruit.com/bluefruit-nrf52-feather-learning-guide/device-pinout).
 I used A0-A3 for my 'rows' and A4-A7 for the 'columns'.
 
-I used the diagram from [Bald Engineer | Matrix Keyboard](https://www.baldengineer.com/arduino-keyboard-matrix-tutorial.html) when wiring things up.
+I used the diagram from [Bald Engineer | Matrix Keyboard](https://www.baldengineer.com/wp-content/uploads/2017/12/Ghosting-Example.jpg) when wiring things up.
 
 I then used the [Keypad](https://github.com/Chris--A/Keypad) library to read the matrix.
 
@@ -62,9 +63,16 @@ I don't have any encoders
 set NUMBER_OF_ENDCODERS to 0 in vars.h
 
 ```
-#define NUMBER_OF_ENCODERS 2
+#define NUMBER_OF_ENCODERS 0
 ```
 
+Then change the definition in buttonplate.h to read:
+
+```
+EncoderConfig encoderConfiguration[NUMBER_OF_ENCODERS];
+```
+
+basically just remove the assignment.
 
 
 
