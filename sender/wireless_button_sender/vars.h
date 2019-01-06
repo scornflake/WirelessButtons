@@ -40,22 +40,27 @@ char keys[ROWS * COLS] = {
 byte rowPins[ROWS] = {2, 3, 4, 5};     //connect to the row pinouts of the kpd
 byte colPins[COLS] = {28, 29, 12, 13}; //connect to the column pinouts of the kpd
 
-/* ORIGINAL */
+/* User setup here */
 
 /*
 ** Vars affecting # of buttons reported over HID.
+** By default, we make the buttons array on a multiple of 8 bits (rounded up).
 ** ::Note:: These values affect other struct sizes
 */
-
-// The number of rotary encoders on the button plate
-// SWBButtonPlate.encoderConfiguration is directly affected.
-
-// Number of buttons you want see (this must be a multiple of 8)
-// If you make it more/less, you need to adjust the hid_button_masher_t type
-//
-// SWBButtonPlate.buttonToPortMap is directly affected
-#define ROUND_UP(N, S) ((((N) + (S)-1) / (S)) * (S))
 #define NUMBER_OF_BUTTONS 16
+
+/*
+** How many rotary encoders you have. Each requires 2 pins for input.
+** SWBButtonPlate.encoderConfiguration is directly affected.
+** ::Note:: These values affect other struct sizes
+*/
+#define NUMBER_OF_ENCODERS 2
+
+/*
+** Automagic stuff from here
+*/
+
+#define ROUND_UP(N, S) ((((N) + (S)-1) / (S)) * (S))
 #define NUMBER_OF_ENCODER_OUTPUTS (NUMBER_OF_ENCODERS * 2)
 #define TOTAL_OUTPUTS (NUMBER_OF_BUTTONS + NUMBER_OF_ENCODER_OUTPUTS)
 #define NUM_HID_INPUTS (ROUND_UP(TOTAL_OUTPUTS, 8))

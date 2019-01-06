@@ -9,7 +9,3 @@ Gear change: 2                      = 2
 Total: 20
 
 
-Assignments
-----------
-
-Buttons: 
