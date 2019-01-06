@@ -73,11 +73,14 @@ By that I mean the number of buttons I have, and the two encoders.
 It's easy enough to change tho ... after a bit of explanation and learning on your part :-)
 
 Here's what's important to know:
- - vars.h contains most of the configuration. Go there first.
+ 
+ *vars.h contains most of the configuration. Go there first.*
+
  - "pinouts" for your ROWS/COLS of the matrix are in rowPins and colPins respectively.
- - "button numbers" start at 0. All push buttons in the matrix are assumed to come before anyting else. Matrix encoder outputs should begin at NUMBER_OF_BUTTONS + 1.
- - buttonplate.h (go to the bottom!!!), contains the rest. Specifically: encoderConfiguration.
-   -  EncoderConfig(14, 11, 16, 17) means:
+ - "button numbers" start at 0. All push buttons in the matrix are assumed to come before anything else. Rotary encoder outputs should begin at NUMBER_OF_BUTTONS (button numbers are zero relative).
+ - encoderConfiguration:
+   - Spells out the pins used for rotary encoders, and their respective button numbers.
+   - EncoderConfig(14, 11, 16, 17) means:
     - Use pins 14, 11 for encoder input.
     - Use *button* 16 as left, *button* 17 as right. (bits 15 and 16 in the HID output). This works for the first encoder because my buttons take numbers 0->15.  The 2nd encoder uses buttons 18 & 19, and so on (if you had more encoders).
     - If you change the number of encoders you have to change this definition.    
@@ -96,6 +99,13 @@ Changing the number of buttons
 - Change NUMBER_OF_BUTTONS in vars.h
 - Change ROWS/COLS to be whatever works for your wiring.
 - keys[ROWS * COLS] to have consecutive integers, starting at 0.
+
+Battery Monitoring
+------------------
+ - Set MONITOR_BATTERY to true.
+ - VBATPIN should be 31 (assuming a feather BLE unit)
+ - If your LED is too bright, use MONITOR_LED_INTENSITY to reduce.
+ - Assumes use of a simple RGB LED (not a pixel device or other single data line driven thing)
 
 Charging
 --------

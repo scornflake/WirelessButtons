@@ -46,9 +46,9 @@ struct Pixel
             rgbRamps[0].go(0, duration, SINUSOIDAL_INOUT, FORTHANDBACK);
             rgbRamps[1].go(200, duration, SINUSOIDAL_INOUT, FORTHANDBACK);
             rgbRamps[2].go(0, duration, SINUSOIDAL_INOUT, FORTHANDBACK);
-#ifdef DEBUG
-            Serial.println("Flash Green");
-#endif
+// #ifdef DEBUG
+            // Serial.println("Flash Green");
+// #endif
             mode = MODE_FLASH;
         }
     }
@@ -84,7 +84,7 @@ struct Pixel
         }
 
 #ifdef DEBUG
-        Serial.printf("Pixel r: %d, g: %d, b:%d\n", r, g, b);
+        // Serial.printf("Pixel r: %d, g: %d, b:%d\n", r, g, b);
 #endif
     }
 

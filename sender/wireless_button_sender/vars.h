@@ -23,12 +23,12 @@
 const int BATTERY_LED_PIN[3] = {15, 7, 11}; //R,G,B
 const int VBATPIN = 31;                     // Pin from which VBAT (lipo) can be read. Adafruit nRF Feather specific.
 const bool MONITOR_BATTERY = true;          // set to 1 to perform monitoring/reading of pin at all
-const float MONITOR_LED_INTENSITY = 0.25f;   // Overall intensity of the LED. 0 == off, 1.0 = full on
+const float MONITOR_LED_INTENSITY = 0.25f;  // Overall intensity of the LED. 0 == off, 1.0 = full on
 const bool MOCK_BATTERY = false;            // If true, battery isn't ready, and fake values are sent every now and then
 
 #ifdef DEBUG
-#define DEBUG_MONITOR_BATTERY 1 // set to 1 to see debug Serial output
-#define DEBUG_BUTTON_PRESSES 1  // set to 1 to see output of button presses
+// #define DEBUG_MONITOR_BATTERY 1 // set to 1 to see debug Serial output
+#define DEBUG_BUTTON_PRESSES 1 // set to 1 to see output of button presses
 #endif
 
 /*
