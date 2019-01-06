@@ -8,6 +8,20 @@
 #include "vars.h"
 #include "buttonhid.h"
 
+struct EncoderConfig
+{
+  int pins[2];
+  int buttonNumbers[2];
+
+  EncoderConfig(int pin1, int pin2, int buttonOne, int buttonTwo)
+  {
+    pins[0] = pin1;
+    pins[1] = pin2;
+    buttonNumbers[0] = buttonOne;
+    buttonNumbers[1] = buttonTwo;
+  }
+};
+
 class SWBEncoderWithHold : public SwRotaryEncoder
 {
 public:
@@ -81,35 +95,26 @@ public:
   void setupButtonInputs()
   {
 #ifdef DEBUG
-    Serial.print("Using as input: ");
+    Serial.printf("Using a %dx%d matrix for buttons\n", ROWS, COLS);
 #endif
 
     keypad = new Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
-//     for (int i = 0; i < NUM_BUTTONS; i++)
-//     {
-//       if (isMappedButton(i))
-//       {
-//         int port = portForButtonNumber(i);
-//         pinMode(port, INPUT_PULLUP);
-// #ifdef DEBUG
-//         Serial.printf("%d, ", port);
-// #endif
-//       }
-//     }
+
 #ifdef DEBUG
     Serial.println();
+    Serial.println("Setting up encoders ...");
 #endif
 
     if (NUMBER_OF_ENCODERS > 0)
     {
       for (int i = 0; i < NUMBER_OF_ENCODERS; i++)
       {
-        int *pins = encoderButtons[i];
+        EncoderConfig &cfg = encoderConfiguration[i];
 #ifdef DEBUG
-        Serial.printf("Encoder #%d uses buttons %d,%d", i, pins[0], pins[1]);
+        Serial.printf("Encoder #%d uses pins %d,%d outputting to buttons %d and %d", i, cfg.pins[0], cfg.pins[1], cfg.buttonNumbers[0], cfg.buttonNumbers[1]);
         Serial.println();
 #endif
-        encoders[i].begin(portForButtonNumber(pins[0]), portForButtonNumber(pins[1]));
+        encoders[i].begin(cfg.pins[0], cfg.pins[1]);
 
         // only needed for HwRotaryEncoder, which I decided not to use
         // when I was debugging the weirdness. Not sure Hw was the cause.
@@ -171,44 +176,15 @@ public:
     {
       int result = encoders[idx].readWithHold();
 
+      // Serial.printf("Result for encoder %d = %d\n", idx, result);
+
       // set the left/right button state
-      encoderDidChange |= setButtonState(encoderButtons[idx][0], result == -1);
-      encoderDidChange |= setButtonState(encoderButtons[idx][1], result == 1);
+      EncoderConfig &cfg = encoderConfiguration[idx];
+      encoderDidChange |= setButtonState(cfg.buttonNumbers[0], result == -1);
+      encoderDidChange |= setButtonState(cfg.buttonNumbers[1], result == 1);
     }
 
     return encoderDidChange;
-  }
-
-  bool isMappedButton(int buttonNumber)
-  {
-    return portForButtonNumber(buttonNumber) > -1;
-  }
-
-  bool isEncoderButton(int buttonNumber)
-  {
-    for (int i = 0; i < NUMBER_OF_ENCODERS; i++)
-    {
-      if (encoderButtons[i][0] == buttonNumber || encoderButtons[i][1] == buttonNumber)
-      {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  bool isButtonPressed(int buttonNumber)
-  {
-    int port = portForButtonNumber(buttonNumber);
-    if (port == 20)
-    {
-      // DFU
-    }
-    return digitalRead(port) == LOW;
-  }
-
-  int portForButtonNumber(uint8_t buttonNumber)
-  {
-    return buttonToPortMap[buttonNumber];
   }
 
   bool setButtonState(uint8_t buttonNumber, bool state)
@@ -222,7 +198,7 @@ public:
       if (existingValue != state)
       {
 #ifdef DEBUG_BUTTON_PRESSES &&DEBUG
-        Serial.printf("Setting button %d (port %d)", buttonNumber, portForButtonNumber(buttonNumber));
+        Serial.printf("Setting button %d", buttonNumber);
         Serial.printf(", array: %d offset %d", arrayIndex, arrayOffset);
         Serial.print(", to state: ");
         state ? Serial.print("ON") : Serial.print("OFF");
@@ -287,35 +263,8 @@ private:
   Keypad *keypad = 0;
 
   // Encoder button numbers (easier to read!)
-  // [x][y], where x  = encoder number, y = button number
-  int encoderButtons[0][0];
-  // int encoderButtons[NUMBER_OF_ENCODERS][2] = {{5, 7}, {14, 15}};
-
-  //  Button 'integer' numbers (0-19) => pin input ports
-  int buttonToPortMap[NUM_BUTTONS] = {
-      2, // 0
-      3, // 1
-      4, // 2..
-      5,
-      28,
-      29,
-      12,
-      13,
-      14,
-      8,
-      6,
-      20,
-      25,
-      26,
-      27,
-      30,
-      11,
-      7,
-      15,
-      16,
-      -1,
-      -1,
-      -1,
-      -1,
-  };
+  // [x][y], where x  = encoder number, y = pin number
+  EncoderConfig encoderConfiguration[NUMBER_OF_ENCODERS] = {
+      EncoderConfig(14, 8, 16, 17),
+      EncoderConfig(30, 27, 18, 19)};
 };

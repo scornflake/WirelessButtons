@@ -31,6 +31,11 @@ void setup()
 
   Serial.println("Neils Button Masher");
   Serial.println("-------------------\n");
+  Serial.printf("Number of buttons: %d\n", NUMBER_OF_BUTTONS);
+  Serial.printf("Number of encoders: %d\n", NUMBER_OF_ENCODERS);
+  Serial.printf("Total number of HID Inputs: %d\n", NUM_HID_INPUTS);
+  Serial.printf("Num bytes for button HID struct: %d\n", NUMBER_OF_BUTTON_BYTES);
+  Serial.println();
 #endif
 
   plate.setupButtonPlate();
@@ -55,18 +60,9 @@ void loop()
 
   // check buttons
   sendNewState = plate.pollButtons();
-  // for (int btnNumber = 0; btnNumber < NUM_BUTTONS; btnNumber++)
-  // {
-  //   if (plate.isEncoderButton(btnNumber))
-  //     continue;
-  //   if (!plate.isMappedButton(btnNumber))
-  //     continue;
-  //   bool currentState = plate.isButtonPressed(btnNumber);
-  //   sendNewState |= plate.setButtonState(btnNumber, currentState);
-  // }
 
   // check Encoders
-  // sendNewState |= plate.pollEncoders();
+  sendNewState |= plate.pollEncoders();
 
   if (sendNewState)
   {

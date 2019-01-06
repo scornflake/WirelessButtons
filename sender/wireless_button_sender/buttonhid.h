@@ -26,10 +26,10 @@ uint8_t const hid_report_descriptor2[] =
         // Buttons
         HID_USAGE_PAGE(HID_USAGE_PAGE_BUTTON),
         HID_USAGE_MIN(1),
-        HID_USAGE_MAX(NUM_BUTTONS),
+        HID_USAGE_MAX(NUM_HID_INPUTS),
         HID_LOGICAL_MIN(0),
         HID_LOGICAL_MAX(1),
-        HID_REPORT_COUNT(NUM_BUTTONS), // Keyboard
+        HID_REPORT_COUNT(NUM_HID_INPUTS), // Keyboard
         HID_REPORT_SIZE(1),
         HID_INPUT(HID_CONSTANT | HID_VARIABLE | HID_ABSOLUTE),
 

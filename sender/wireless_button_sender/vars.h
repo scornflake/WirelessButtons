@@ -20,7 +20,7 @@
 
 // Adds a delay in loop(), so that the entire thing uses less power
 // If set to 0, no delay() is called
-const int __loopDelayInMs = 0;
+const int __loopDelayInMs = 100;
 
 /* MATRIX */
 
@@ -45,18 +45,25 @@ byte colPins[COLS] = {28, 29, 12, 13}; //connect to the column pinouts of the kp
 */
 
 // The number of rotary encoders on the button plate
-// SWBButtonPlate.encoderButtons is directly affected.
-#define NUMBER_OF_ENCODERS 0
+// SWBButtonPlate.encoderConfiguration is directly affected.
+#define NUMBER_OF_ENCODERS 2
 
 // Number of buttons you want see (this must be a multiple of 8)
 // If you make it more/less, you need to adjust the hid_button_masher_t type
 //
 // SWBButtonPlate.buttonToPortMap is directly affected
-#define NUM_BUTTONS 24
+#define ROUND_UP(N, S) ((((N) + (S) - 1) / (S)) * (S))
+#define NUMBER_OF_BUTTONS 16
+#define NUMBER_OF_ENCODER_OUTPUTS (NUMBER_OF_ENCODERS * 2)
+#define TOTAL_OUTPUTS (NUMBER_OF_BUTTONS + NUMBER_OF_ENCODER_OUTPUTS)
+#define NUM_HID_INPUTS (ROUND_UP(TOTAL_OUTPUTS, 8))
+#define NUMBER_OF_BUTTON_BYTES (NUM_HID_INPUTS / 8)
+
+/* TODO: How to put in a compiler warning if NUM_HID_INPUTS not a multiple of 8???? */
 
 typedef ATTR_PACKED_STRUCT(struct)
 {
-    uint8_t buttons[3]; // 3 * 8 == 24
+    uint8_t buttons[NUMBER_OF_BUTTON_BYTES]; 
 }
 hid_button_masher_t;
 
