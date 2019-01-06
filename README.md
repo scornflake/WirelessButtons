@@ -31,7 +31,6 @@ Answer: so we can be efficient. While it is possible to have 20 odd inputs for t
 If you wanted to (as I did) have an LED for battery status: you're out of luck.
 Enter '[matrix keyboards](https://www.baldengineer.com/arduino-keyboard-matrix-tutorial.html)'. While the wiring is more complex, the result is you can use a 4x4 matrix to get 16 inputs, leaving loads of pins available for other things. Like lights! Lights are shiny. We like lights.
 
-![Row & Column Wiring](https://raw.githubusercontent.com/scornflake/WirelessButtons/master/images/IMG_4721.jpg)
 
 Here's the (pinout for the Feather](https://learn.adafruit.com/bluefruit-nrf52-feather-learning-guide/device-pinout).
 
@@ -41,11 +40,21 @@ My Wiring
 
 ![Row & Column Wiring](https://raw.githubusercontent.com/scornflake/WirelessButtons/master/images/IMG_4721.jpg)
 
+Re matrix wiring, I used the diagram from [Bald Engineer | Matrix Keyboard](https://www.baldengineer.com/wp-content/uploads/2017/12/Ghosting-Example.jpg) as a reference. I then used the [Keypad](https://github.com/Chris--A/Keypad) arduino library to read the matrix.
+
+Note the use of diodes at each switch.
+
+ ![Diode Wiring](https://raw.githubusercontent.com/scornflake/WirelessButtons/master/images/IMG_4716.jpg)
+
+
+Rotary Encoder Wiring
+---------------------
+
  - Encoder 1 uses pins 14,11
  - Encoder 2 uses pins 30,27
  
- 
-Re matrix wiring, I used the diagram from [Bald Engineer | Matrix Keyboard](https://www.baldengineer.com/wp-content/uploads/2017/12/Ghosting-Example.jpg) as a reference. I then used the [Keypad](https://github.com/Chris--A/Keypad) arduino library to read the matrix.
+ ![Rotary Thingies](https://raw.githubusercontent.com/scornflake/WirelessButtons/master/images/IMG_4722.jpg)
+
 
 
 
