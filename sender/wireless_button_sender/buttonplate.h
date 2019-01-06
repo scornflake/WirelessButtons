@@ -265,6 +265,6 @@ private:
   // Encoder button numbers (easier to read!)
   // [x][y], where x  = encoder number, y = pin number
   EncoderConfig encoderConfiguration[NUMBER_OF_ENCODERS] = {
-      EncoderConfig(14, 8, 16, 17),
+      EncoderConfig(14, 11, 16, 17),
       EncoderConfig(30, 27, 18, 19)};
 };
