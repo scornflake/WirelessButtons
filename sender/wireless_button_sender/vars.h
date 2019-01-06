@@ -13,32 +13,42 @@
 #define DEBUG 1
 #endif
 
+#ifdef DEBUG
+// #define DEBUG_MONITOR_BATTERY 1 // set to 1 to see debug Serial output
+#define DEBUG_POWER_SWITCH 1   // show info re power
+#define DEBUG_BUTTON_PRESSES 1 // set to 1 to see output of button presses
+#endif
+
 /*
 ** User setup here 
 */
 
-/* Battery Monitoring */
+/* Power switch */
+// Want to use a power switch (with mosfet)? Uncomment this.
+const bool USE_POWER_SWITCH = true;
 
+// Specify the next 3 values, to setup the gate and timeout periods
+const int POWER_SWITCH_GATE_PIN = 11;                  // because I didn't actually hook pin 11 (blue) RGB up
+const int AUTO_TURNOFF_MINUTES = 15;                   // How many minutes to wait with no activity, until turning off?
+const int POWER_SWITCH_TURNS_ON_IF_HELD_FOR_MS = 2000; // must hold power switch for 2s to turn on wheel
+
+// this one? well. Yeh. Leave it.
+const int AUTO_TURNOFF_IF_NO_ACTIVITY_MS = (60 * AUTO_TURNOFF_MINUTES * 1000); // cos I like constants.
+
+/* Battery Monitoring */
 // What pins is the RGB LED connected to?
-const int BATTERY_LED_PIN[3] = {15, 7, 11}; //R,G,B
+const int BATTERY_LED_PIN[3] = {15, 7, 11}; //R,G,B pinouts
 const int VBATPIN = 31;                     // Pin from which VBAT (lipo) can be read. Adafruit nRF Feather specific.
 const bool MONITOR_BATTERY = true;          // set to 1 to perform monitoring/reading of pin at all
 const float MONITOR_LED_INTENSITY = 0.25f;  // Overall intensity of the LED. 0 == off, 1.0 = full on
 const bool MOCK_BATTERY = false;            // If true, battery isn't ready, and fake values are sent every now and then
 
-#ifdef DEBUG
-// #define DEBUG_MONITOR_BATTERY 1 // set to 1 to see debug Serial output
-#define DEBUG_BUTTON_PRESSES 1 // set to 1 to see output of button presses
-#endif
-
-/*
-** Vars affecting # of buttons reported over HID.
-** By default, we make the buttons array on a multiple of 8 bits (rounded up).
-** ::Note:: These values affect other struct sizes
-*/
+/* Buttons ... the Matrix */
+// Vars affecting # of buttons reported over HID.
+// By default, we make the buttons array on a multiple of 8 bits (rounded up).
+// ::Note:: These values affect other struct sizes
 const int NUMBER_OF_BUTTONS = 16;
 
-/* Button Matrix */
 // Our wheel has 16 buttons and 2 encoders (they take 4 inputs)
 // Define a 4x4 matrix (for the 16 buttons)
 const byte ROWS = 4;

@@ -5,9 +5,11 @@
 #include "buttonhid.h"
 #include "buttonplate.h"
 #include "battery.h"
+#include "power.h"
 
+PowerSwitch powerSwitch(POWER_SWITCH_GATE_PIN, POWER_SWITCH_TURNS_ON_IF_HELD_FOR_MS, AUTO_TURNOFF_IF_NO_ACTIVITY_MS);
 SWBButtonPlate plate;
-DoomBatteryMonitor batteryMonitor(VBATPIN, (int*)&BATTERY_LED_PIN[0], 1000, MOCK_BATTERY);
+DoomBatteryMonitor batteryMonitor(VBATPIN, (int *)&BATTERY_LED_PIN[0], 1000, MOCK_BATTERY);
 
 void setup()
 {
@@ -28,6 +30,11 @@ void setup()
 
   plate.setupButtonPlate();
   batteryMonitor.setup();
+
+  if (USE_POWER_SWITCH)
+  {
+    powerSwitch.setup();
+  }
 }
 
 void loop()
@@ -41,6 +48,12 @@ void loop()
 
   // check Encoders
   sendNewState |= plate.pollEncoders();
+
+  // check power
+  if (USE_POWER_SWITCH)
+  {
+    powerSwitch.update(sendNewState);
+  }
 
   if (sendNewState)
   {
