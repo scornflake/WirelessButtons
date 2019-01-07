@@ -7,7 +7,7 @@
 #include "battery.h"
 #include "power.h"
 
-PowerSwitch powerSwitch(POWER_SWITCH_GATE_PIN, POWER_SWITCH_TURNS_ON_IF_HELD_FOR_MS, AUTO_TURNOFF_IF_NO_ACTIVITY_MS);
+PowerSwitch powerSwitch(POWER_SWITCH_TURNS_ON_IF_HELD_FOR_MS, AUTO_TURNOFF_IF_NO_ACTIVITY_MS);
 SWBButtonPlate plate;
 DoomBatteryMonitor batteryMonitor(VBATPIN, (int *)&BATTERY_LED_PIN[0], 1000, MOCK_BATTERY, SHOW_BATTERY_FOR_MS, POWER_LED_ALWAYS_SHOWS_IF_BELOW_PCT);
 
@@ -16,8 +16,7 @@ void plateButtonPressed(int buttonNumber, KeyState state)
 #ifdef DEBUG
   String msg = state == PRESSED ? "Pressed" : "Released";
   Serial.print(msg);
-  Serial.printf(" button number %d", buttonNumber);
-  Serial.println();
+  Serial.printf(" button number %d\n", buttonNumber);
 #endif
 
   if (POWER_BTN_SHORT_PRESS_TO_SHOW_BATTERY_LEVEL)
@@ -48,12 +47,17 @@ void setup()
 
   plate.setupButtonPlate();
   plate.setButtonPressCallback(plateButtonPressed);
+
   batteryMonitor.setup();
 
+  // only attempts to control the mosfet if the gate pin is set.
+  // it'll still do other stuff, like wait for inactivity and sleep the device
   if (USE_POWER_SWITCH)
   {
-    powerSwitch.setup();
+    powerSwitch.setGatePin(POWER_SWITCH_GATE_PIN);
   }
+
+  powerSwitch.setup();
 }
 
 void loop()
@@ -72,12 +76,9 @@ void loop()
   sendNewState |= plate.pollEncoders();
 
   // check power
-  if (USE_POWER_SWITCH)
-  {
-    // If we're sending new state, it's because a button has been pressed.
-    // Use this to also tell the power switch that the device is in use
-    powerSwitch.update(sendNewState);
-  }
+  // If we're sending new state, it's because a button has been pressed.
+  // Use this to also tell the power switch that the device is in use
+  powerSwitch.maybeTurnOnOrOff(sendNewState);
 
   if (sendNewState)
   {

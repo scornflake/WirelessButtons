@@ -67,7 +67,7 @@ public:
 #endif
 
     // Set max power. Accepted values are: -40, -30, -20, -16, -12, -8, -4, 0, 4
-    Bluefruit.setTxPower(0);
+    Bluefruit.setTxPower(4);
 #ifdef PRODUCTION
     Bluefruit.setName("Button Masher");
 #else
@@ -96,7 +96,7 @@ public:
   {
     battery.write(newLevel);
     battery.notify(newLevel);
-#ifdef DEBUG_BATTERY_NOTIFICATIONS
+#ifdef DEBUG_BATTERY_BLE_NOTIFY
     Serial.printf("Sending level %d over BLE\n", newLevel);
 #endif
   }
@@ -251,11 +251,12 @@ private:
     Bluefruit.Advertising.addAppearance(BLE_APPEARANCE_HID_GAMEPAD);
 
     // Include BLE HID services
-    Bluefruit.Advertising.addService(battery);
     Bluefruit.Advertising.addService(hid);
+    Bluefruit.Advertising.addService(battery);
 
     // There is enough room for 'Name' in the advertising packet
-    Bluefruit.Advertising.addName();
+    // Bluefruit.Advertising.addName();
+    Bluefruit.ScanResponse.addName();
 
     /* Start Advertising
      - Enable auto advertising if disconnected

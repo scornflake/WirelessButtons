@@ -7,7 +7,7 @@
 // Its needed to NOT wait for Serial to appear, if in prod
 //
 // This should be defined, if building for the real button plate.
-// #define PRODUCTION 1
+#define PRODUCTION 1
 
 #ifndef PRODUCTION
 #define DEBUG 1
@@ -19,8 +19,9 @@
 #ifdef DEBUG
 #define DEBUG_MONITOR_BATTERY 1       // set to 1 to see debug Serial output
 #define DEBUG_BATTERY_NOTIFICATIONS 1 // set if you want to see when BLE battery level is updateds
+// #define DEBUG_BATTERY_BLE_NOTIFY 1
 // #define DEBUG_BATTERY_RGB_PIXEL 1
-#define DEBUG_POWER_SWITCH 1          // show info re power
+#define DEBUG_POWER_SWITCH 1 // show info re power
 // #define DEBUG_BUTTON_PRESSES 1        // set to 1 to see output of button presses
 #endif
 
@@ -29,7 +30,8 @@
 */
 
 /* Power switch */
-// Want to use a power switch (with mosfet)? Then make this 'true'
+// Want to use a button (connected to a power mosfet) to switch on/off the arduino?
+// Then make this 'true'
 const bool USE_POWER_SWITCH = false;
 
 // Specify the next 3 values, to setup the gate and timeout periods
@@ -42,14 +44,18 @@ const bool POWER_BTN_SHORT_PRESS_TO_SHOW_BATTERY_LEVEL = true; // You can short 
 const int POWER_LED_ALWAYS_SHOWS_IF_BELOW_PCT = 20;            // always show the LED if power drops below this figure
 
 // this one? well. Yeh. Leave it.
+#ifdef DEBUG
+const int AUTO_TURNOFF_IF_NO_ACTIVITY_MS = 10000;
+#else
 const int AUTO_TURNOFF_IF_NO_ACTIVITY_MS = (60 * AUTO_TURNOFF_MINUTES * 1000); // cos I like constants.
+#endif
 
 /* Battery Monitoring */
 // What pins is the RGB LED connected to?
 const int BATTERY_LED_PIN[3] = {15, 7, 11}; //R,G,B pinouts
 const int VBATPIN = 31;                     // Pin from which VBAT (lipo) can be read. Adafruit nRF Feather specific.
 const bool MONITOR_BATTERY = true;          // set to 1 to perform monitoring/reading of pin at all
-const int SHOW_BATTERY_FOR_MS = 0;       // if > 0, the battery LED will light for only this many ms. It'll then turn off to save power.
+const int SHOW_BATTERY_FOR_MS = 0;          // if > 0, the battery LED will light for only this many ms. It'll then turn off to save power.
 const float MONITOR_LED_INTENSITY = 0.25f;  // Overall intensity of the LED. 0 == off, 1.0 = full on
 const bool MOCK_BATTERY = false;            // If true, battery isn't ready, and fake values are sent every now and then
 
