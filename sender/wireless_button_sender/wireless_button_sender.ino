@@ -9,7 +9,25 @@
 
 PowerSwitch powerSwitch(POWER_SWITCH_GATE_PIN, POWER_SWITCH_TURNS_ON_IF_HELD_FOR_MS, AUTO_TURNOFF_IF_NO_ACTIVITY_MS);
 SWBButtonPlate plate;
-DoomBatteryMonitor batteryMonitor(VBATPIN, (int *)&BATTERY_LED_PIN[0], 1000, MOCK_BATTERY);
+DoomBatteryMonitor batteryMonitor(VBATPIN, (int *)&BATTERY_LED_PIN[0], 1000, MOCK_BATTERY, SHOW_BATTERY_FOR_MS, POWER_LED_ALWAYS_SHOWS_IF_BELOW_PCT);
+
+void plateButtonPressed(int buttonNumber, KeyState state)
+{
+#ifdef DEBUG
+  String msg = state == PRESSED ? "Pressed" : "Released";
+  Serial.print(msg);
+  Serial.printf(" button number %d", buttonNumber);
+  Serial.println();
+#endif
+
+  if (POWER_BTN_SHORT_PRESS_TO_SHOW_BATTERY_LEVEL)
+  {
+    if (buttonNumber == POWER_BTN_SHORT_PRESS_BUTTON_NUMBER && state == HOLD)
+    {
+      batteryMonitor.showLED();
+    }
+  }
+}
 
 void setup()
 {
@@ -29,6 +47,7 @@ void setup()
 #endif
 
   plate.setupButtonPlate();
+  plate.setButtonPressCallback(plateButtonPressed);
   batteryMonitor.setup();
 
   if (USE_POWER_SWITCH)
@@ -39,7 +58,10 @@ void setup()
 
 void loop()
 {
-  batteryMonitor.monitor();
+  if (batteryMonitor.monitor())
+  {
+    plate.notifyNewBatteryLevel(batteryMonitor.lastBatteryPercent());
+  }
 
   bool sendNewState = false;
 

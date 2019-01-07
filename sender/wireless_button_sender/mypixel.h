@@ -1,6 +1,7 @@
 #ifndef __MYPIXEL
 #define __MYPIXEL
 
+#include <Arduino.h>
 #include <Ramp.h>
 
 struct Pixel
@@ -16,10 +17,8 @@ struct Pixel
     uint8_t g;
     uint8_t b;
 
-    inline Pixel(uint8_t ir, uint8_t ig, uint8_t ib) __attribute__((always_inline))
-    : r(ir), g(ig), b(ib) {}
-    inline Pixel() __attribute__((always_inline))
-    : r(0), g(0), b(0) {}
+    Pixel(uint8_t ir, uint8_t ig, uint8_t ib) : r(ir), g(ig), b(ib) {}
+    Pixel() : r(0), g(0), b(0) {}
 
     void setColor(uint32_t color)
     {
@@ -46,9 +45,9 @@ struct Pixel
             rgbRamps[0].go(0, duration, SINUSOIDAL_INOUT, FORTHANDBACK);
             rgbRamps[1].go(200, duration, SINUSOIDAL_INOUT, FORTHANDBACK);
             rgbRamps[2].go(0, duration, SINUSOIDAL_INOUT, FORTHANDBACK);
-// #ifdef DEBUG
+            // #ifdef DEBUG
             // Serial.println("Flash Green");
-// #endif
+            // #endif
             mode = MODE_FLASH;
         }
     }
@@ -124,16 +123,27 @@ class RGBLed
         _intensity = val;
     }
 
+    void setEnabled(bool flag)
+    {
+        _enabled = flag;
+    }
+
+    bool isEnabled() {
+        return _enabled;
+    }
+
     void writePixel(Pixel &pixel)
     {
-        analogWrite(redPin, pixel.r * _intensity);
-        analogWrite(greenPin, pixel.g * _intensity);
-        analogWrite(bluePin, pixel.b * _intensity);
+        float actualIntensity = _enabled ? _intensity : 0;
+        analogWrite(redPin, pixel.r * actualIntensity);
+        analogWrite(greenPin, pixel.g * actualIntensity);
+        analogWrite(bluePin, pixel.b * actualIntensity);
     }
 
   private:
     int redPin, greenPin, bluePin;
     float _intensity;
+    float _enabled;
 };
 
 #endif

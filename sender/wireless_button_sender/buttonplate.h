@@ -9,6 +9,8 @@
 #include "vars.h"
 #include "buttonhid.h"
 
+typedef void (*event_button_pressed_t)(int buttonNumber, KeyState state);
+
 class SWBEncoderWithHold : public SwRotaryEncoder
 {
 public:
@@ -59,6 +61,11 @@ public:
     // HID Device can have a min connection interval of 9*1.25 = 11.25 ms
     Bluefruit.setConnInterval(9, 16); // min = 9*1.25=11.25 ms, max = 16*1.25=20ms
 
+#ifdef DO_NOT_SHOW_BLUE_LED
+    // off Blue LED for lowest power consumption
+    Bluefruit.autoConnLed(false);
+#endif
+
     // Set max power. Accepted values are: -40, -30, -20, -16, -12, -8, -4, 0, 4
     Bluefruit.setTxPower(0);
 #ifdef PRODUCTION
@@ -76,7 +83,22 @@ public:
 
     // BLE HID
     hid.begin();
+    battery.begin();
     startAdvertising();
+  }
+
+  void setButtonPressCallback(event_button_pressed_t cb)
+  {
+    _buttonPressCallback = cb;
+  }
+
+  void notifyNewBatteryLevel(uint8_t newLevel)
+  {
+    battery.write(newLevel);
+    battery.notify(newLevel);
+#ifdef DEBUG_BATTERY_NOTIFICATIONS
+    Serial.printf("Sending level %d over BLE\n", newLevel);
+#endif
   }
 
   void setupButtonInputs()
@@ -132,22 +154,29 @@ public:
             case RELEASED:
             {
               buttonStateChanged = true;
-              /* I decided to use 'int' values for the keymap.
+              /* 
+              I decided to use 'int' values for the keymap.
               This means I can just cast to an int, and use that directly in a call to setButtonState 
               */
               uint8_t buttonNumber = (int)keypad->key[i].kchar;
               setButtonState(buttonNumber, keypad->key[i].kstate == PRESSED ? true : false);
+              if (_buttonPressCallback)
+              {
+                _buttonPressCallback(buttonNumber, keypad->key[i].kstate);
+              }
               buttonStateChanged = true;
-
-#ifdef DEBUG
-              String msg = keypad->key[i].kstate == PRESSED ? "Pressed" : "Released";
-              Serial.print(msg);
-              Serial.printf(" button number %d", buttonNumber);
-              Serial.println();
-#endif
             }
+            break;
+
             default:
+            {
+              uint8_t buttonNumber = (int)keypad->key[i].kchar;
+              if (_buttonPressCallback)
+              {
+                _buttonPressCallback(buttonNumber, keypad->key[i].kstate);
+              }
               break;
+            }
             }
           }
         }
@@ -164,8 +193,8 @@ public:
       int result = encoders[idx].readWithHold();
 
       // Serial.printf("Result for encoder %d = %d\n", idx, result);
-
       // set the left/right button state
+
       EncoderConfig &cfg = encoderConfiguration[idx];
       encoderDidChange |= setButtonState(cfg.buttonNumbers[0], result == -1);
       encoderDidChange |= setButtonState(cfg.buttonNumbers[1], result == 1);
@@ -221,7 +250,8 @@ private:
     Bluefruit.Advertising.addTxPower();
     Bluefruit.Advertising.addAppearance(BLE_APPEARANCE_HID_GAMEPAD);
 
-    // Include BLE HID service
+    // Include BLE HID services
+    Bluefruit.Advertising.addService(battery);
     Bluefruit.Advertising.addService(hid);
 
     // There is enough room for 'Name' in the advertising packet
@@ -243,9 +273,11 @@ private:
   }
 
 private:
+  BLEBas battery;
   SWBButtonHid hid; // 24 buttons over BLE
   BLEDis bledis;
   SWBEncoderWithHold encoders[NUMBER_OF_ENCODERS];
   hid_button_masher_t _state;
+  event_button_pressed_t _buttonPressCallback = 0;
   Keypad *keypad = 0;
 };
