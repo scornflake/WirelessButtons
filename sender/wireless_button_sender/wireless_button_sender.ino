@@ -74,6 +74,8 @@ void loop()
   // check power
   if (USE_POWER_SWITCH)
   {
+    // If we're sending new state, it's because a button has been pressed.
+    // Use this to also tell the power switch that the device is in use
     powerSwitch.update(sendNewState);
   }
 

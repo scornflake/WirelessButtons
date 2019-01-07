@@ -82,8 +82,8 @@ struct Pixel
                 _slerp(fromSlerp[2], toSlerp[2], slerpPercent));
         }
 
-#ifdef DEBUG
-        // Serial.printf("Pixel r: %d, g: %d, b:%d\n", r, g, b);
+#ifdef DEBUG_BATTERY_RGB_PIXEL
+        Serial.printf("Pixel r: %d, g: %d, b:%d\n", r, g, b);
 #endif
     }
 
@@ -106,7 +106,7 @@ struct Pixel
 class RGBLed
 {
   public:
-    RGBLed() : _intensity(1.0) {}
+    RGBLed() : _intensity(1.0), _enabled(true) {}
 
     void setup(int rp, int gp, int bp)
     {
