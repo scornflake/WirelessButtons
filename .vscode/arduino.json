@@ -3,5 +3,5 @@
     "configuration": "softdevice=s132v6,debug=l0",
     "port": "/dev/cu.SLAB_USBtoUART",
     "output": "../ArduinoOutput",
-    "sketch": "sender\\wireless_button_sender\\wireless_button_sender.ino"
+    "sketch": "sender/wireless_button_sender/wireless_button_sender.ino"
 }
