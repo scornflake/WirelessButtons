@@ -67,7 +67,7 @@ void loop()
     plate.notifyNewBatteryLevel(batteryMonitor.lastBatteryPercent());
   }
 
-  bool sendNewState = false;
+  bool sendNewState = false || ALWAYS_SEND_STATE;
 
   // check buttons
   sendNewState = plate.pollButtons();

@@ -64,6 +64,9 @@ const bool MOCK_BATTERY = false;            // If true, battery isn't ready, and
 // By default, we make the buttons array on a multiple of 8 bits (rounded up).
 // ::Note:: These values affect other struct sizes
 const int NUMBER_OF_BUTTONS = 16;
+// Send state every time through loop()
+// If you miss BLE packets, this can make response better
+const bool ALWAYS_SEND_STATE = true;
 
 // Our wheel has 16 buttons and 2 encoders (they take 4 inputs)
 // Define a 4x4 matrix (for the 16 buttons)
@@ -95,7 +98,7 @@ EncoderConfig encoderConfiguration[NUMBER_OF_ENCODERS] = {
 */
 // Adds a delay in loop(), so that the entire thing uses a bit less power
 // If set to 0, no delay() is called
-const int __loopDelayInMs = 1;
+const int __loopDelayInMs = 0;
 
 #define ROUND_UP(N, S) ((((N) + (S)-1) / (S)) * (S))
 #define NUMBER_OF_ENCODER_OUTPUTS (NUMBER_OF_ENCODERS * 2)
