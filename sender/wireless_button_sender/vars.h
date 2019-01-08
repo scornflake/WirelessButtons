@@ -96,9 +96,11 @@ EncoderConfig encoderConfiguration[NUMBER_OF_ENCODERS] = {
 /*
 ** Automagic stuff from here (shouldn't need to touch)
 */
-// Adds a delay in loop(), so that the entire thing uses a bit less power
+// Adds a delay in loop(), so that:
+// a) the entire thing uses a bit less power (I hope)
+// b) we don't saturate local BLE airspace (putting on 0 does!)
 // If set to 0, no delay() is called
-const int __loopDelayInMs = 0;
+const int __loopDelayInMs = 5;
 
 #define ROUND_UP(N, S) ((((N) + (S)-1) / (S)) * (S))
 #define NUMBER_OF_ENCODER_OUTPUTS (NUMBER_OF_ENCODERS * 2)

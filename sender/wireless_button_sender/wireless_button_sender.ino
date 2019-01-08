@@ -81,6 +81,7 @@ void plateButtonPressed(int buttonNumber, KeyState state)
 
 void loop()
 {
+  unsigned long startOfLoopMillis = millis();
   bool sendNewState = false || ALWAYS_SEND_STATE;
 
   // check buttons
@@ -107,6 +108,10 @@ void loop()
 
   if (__loopDelayInMs > 0)
   {
-    delay(__loopDelayInMs);
+    unsigned long loopTime = millis() - startOfLoopMillis;
+    if (loopTime < __loopDelayInMs)
+    {
+      delay(__loopDelayInMs - loopTime);
+    }
   }
 }
