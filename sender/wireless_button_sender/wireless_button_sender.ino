@@ -79,6 +79,10 @@ void plateButtonPressed(int buttonNumber, KeyState state)
   }
 }
 
+static int loopCounter = 0;
+static int packetCounter = 0;
+static int lastLoopCountTime = 0;
+static int backoffAmount = 0;
 void loop()
 {
   unsigned long startOfLoopMillis = millis();
@@ -104,6 +108,7 @@ void loop()
   if (sendNewState)
   {
     plate.sendInputs();
+    packetCounter++;
   }
 
   if (__loopDelayInMs > 0)
@@ -114,4 +119,15 @@ void loop()
       delay(__loopDelayInMs - loopTime);
     }
   }
+
+#ifdef DEBUG_LOOPS_PER_SECOND
+  loopCounter++;
+  if (startOfLoopMillis - lastLoopCountTime > 1000)
+  {
+    Serial.printf("Loops per second: %d. Packets per second: %d\n", loopCounter, packetCounter);
+    loopCounter = 0;
+    packetCounter = 0;
+    lastLoopCountTime = startOfLoopMillis;
+  }
+#endif
 }

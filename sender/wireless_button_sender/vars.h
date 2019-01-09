@@ -7,7 +7,7 @@
 // Its needed to NOT wait for Serial to appear, if in prod
 //
 // This should be defined, if building for the real button plate.
-// #define PRODUCTION 1
+#define PRODUCTION 1
 
 #ifndef PRODUCTION
 #define DEBUG 1
@@ -19,6 +19,7 @@
 #ifdef DEBUG
 #define DEBUG_MONITOR_BATTERY 1       // set to 1 to see debug Serial output
 #define DEBUG_BATTERY_NOTIFICATIONS 1 // set if you want to see when BLE battery level is updateds
+#define DEBUG_LOOPS_PER_SECOND 1
 // #define DEBUG_BATTERY_BLE_NOTIFY 1
 // #define DEBUG_BATTERY_RGB_PIXEL 1
 #define DEBUG_POWER_SWITCH 1 // show info re power
@@ -64,9 +65,10 @@ const bool MOCK_BATTERY = false;            // If true, battery isn't ready, and
 // By default, we make the buttons array on a multiple of 8 bits (rounded up).
 // ::Note:: These values affect other struct sizes
 const int NUMBER_OF_BUTTONS = 16;
+
 // Send state every time through loop()
 // If you miss BLE packets, this can make response better
-const bool ALWAYS_SEND_STATE = true;
+const bool ALWAYS_SEND_STATE = false;
 
 // Our wheel has 16 buttons and 2 encoders (they take 4 inputs)
 // Define a 4x4 matrix (for the 16 buttons)
@@ -100,7 +102,7 @@ EncoderConfig encoderConfiguration[NUMBER_OF_ENCODERS] = {
 // a) the entire thing uses a bit less power (I hope)
 // b) we don't saturate local BLE airspace (putting on 0 does!)
 // If set to 0, no delay() is called
-const int __loopDelayInMs = 5;
+const int __loopDelayInMs = 10;
 
 #define ROUND_UP(N, S) ((((N) + (S)-1) / (S)) * (S))
 #define NUMBER_OF_ENCODER_OUTPUTS (NUMBER_OF_ENCODERS * 2)
