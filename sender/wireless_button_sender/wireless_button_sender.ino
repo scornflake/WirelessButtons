@@ -9,7 +9,7 @@
 #include "mypixel.h"
 
 SWBButtonPlate plate;
-PowerSwitch powerSwitch(POWER_SWITCH_TURNS_ON_IF_HELD_FOR_MS, AUTO_TURNOFF_IF_NO_ACTIVITY_MS);
+PowerSwitch powerSwitch(AUTO_TURNOFF_IF_NO_ACTIVITY_MS);
 BatteryLevelReader batteryMonitor(VBATPIN, 1000, MOCK_BATTERY);
 LipoLed batteryLED(SHOW_BATTERY_FOR_MS, POWER_LED_ALWAYS_SHOWS_IF_BELOW_PCT);
 

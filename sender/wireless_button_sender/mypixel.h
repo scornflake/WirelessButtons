@@ -33,14 +33,20 @@ class RGBLed : public RGBColor
   public:
     RGBLed() : _intensity(1.0), _enabled(true) {}
 
-    virtual void setup(int rp, int gp, int bp)
+    virtual void setup(int rp, int gp, int bp, bool useRed = true, bool useGreen = true, bool useBlue = true)
     {
         redPin = rp;
         greenPin = gp;
         bluePin = bp;
-        pinMode(redPin, OUTPUT);
-        pinMode(greenPin, OUTPUT);
-        pinMode(bluePin, OUTPUT);
+        _useRed = useRed;
+        _useGreen = useGreen;
+        _useBlue = useBlue;
+        if (_useRed)
+            pinMode(redPin, OUTPUT);
+        if (_useGreen)
+            pinMode(greenPin, OUTPUT);
+        if (_useBlue)
+            pinMode(bluePin, OUTPUT);
     }
 
     void setIntensity(float val) { _intensity = val; }
@@ -54,13 +60,17 @@ class RGBLed : public RGBColor
     void writeRGBColor()
     {
         float actualIntensity = _enabled ? _intensity : 0;
-        analogWrite(redPin, r * actualIntensity);
-        analogWrite(greenPin, g * actualIntensity);
-        analogWrite(bluePin, b * actualIntensity);
+        if (_useRed)
+            analogWrite(redPin, r * actualIntensity);
+        if (_useGreen)
+            analogWrite(greenPin, g * actualIntensity);
+        if (_useBlue)
+            analogWrite(bluePin, b * actualIntensity);
     }
 
   private:
     int redPin, greenPin, bluePin;
+    bool _useRed, _useGreen, _useBlue;
     float _intensity;
     float _enabled;
 };
@@ -84,7 +94,7 @@ class LipoLed : public RGBLed
 
     void setup(int rp, int gp, int bp, float initialIntensity = 1.0f)
     {
-        RGBLed::setup(rp, gp, bp);
+        RGBLed::setup(rp, gp, bp, true, true, false);
         setIntensity(initialIntensity);
     }
 

@@ -107,6 +107,10 @@ public:
     Serial.printf("Using a %dx%d matrix for buttons\n", ROWS, COLS);
 #endif
 
+    char keys[NUMBER_OF_BUTTONS];
+    for(int i = 0; i < NUMBER_OF_BUTTONS; i++) {
+      keys[i] = i;
+    }
     keypad = new Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 #ifdef DEBUG
