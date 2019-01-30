@@ -1,24 +1,17 @@
-#ifndef __MYPIXEL
-#define __MYPIXEL
+#ifndef __MYRGBColor
+#define __MYRGBColor
 
 #include <Arduino.h>
 #include <Ramp.h>
 
-struct Pixel
+struct RGBColor
 {
-    enum RampMode
-    {
-        MODE_UNSET,
-        MODE_FLASH,
-        MODE_SLERP
-    };
-
     uint8_t r;
     uint8_t g;
     uint8_t b;
 
-    Pixel(uint8_t ir, uint8_t ig, uint8_t ib) : r(ir), g(ig), b(ib) {}
-    Pixel() : r(0), g(0), b(0) {}
+    RGBColor(uint8_t ir, uint8_t ig, uint8_t ib) : r(ir), g(ig), b(ib) {}
+    RGBColor() : r(0), g(0), b(0) {}
 
     void setColor(uint32_t color)
     {
@@ -33,7 +26,127 @@ struct Pixel
         g = gg;
         b = bb;
     }
+};
 
+class RGBLed : public RGBColor
+{
+  public:
+    RGBLed() : _intensity(1.0), _enabled(true) {}
+
+    virtual void setup(int rp, int gp, int bp, bool useRed = true, bool useGreen = true, bool useBlue = true)
+    {
+        redPin = rp;
+        greenPin = gp;
+        bluePin = bp;
+        _useRed = useRed;
+        _useGreen = useGreen;
+        _useBlue = useBlue;
+        if (_useRed)
+            pinMode(redPin, OUTPUT);
+        if (_useGreen)
+            pinMode(greenPin, OUTPUT);
+        if (_useBlue)
+            pinMode(bluePin, OUTPUT);
+    }
+
+    void setIntensity(float val) { _intensity = val; }
+
+    float getIntensity() { return _intensity; }
+
+    void setEnabled(bool flag) { _enabled = flag; }
+
+    bool isEnabled() { return _enabled; }
+
+    void writeRGBColor()
+    {
+        float actualIntensity = _enabled ? _intensity : 0;
+        if (_useRed)
+            analogWrite(redPin, r * actualIntensity);
+        if (_useGreen)
+            analogWrite(greenPin, g * actualIntensity);
+        if (_useBlue)
+            analogWrite(bluePin, b * actualIntensity);
+    }
+
+  private:
+    int redPin, greenPin, bluePin;
+    bool _useRed, _useGreen, _useBlue;
+    float _intensity;
+    float _enabled;
+};
+
+class LipoLed : public RGBLed
+{
+  public:
+    enum RampMode
+    {
+        MODE_UNSET,
+        MODE_FLASH,
+        MODE_SLERP
+    };
+
+    LipoLed(int showForMs = 0,
+            int showLedIfBelowPct = 20) : _showLevelForMs(showForMs),
+                                          _alwaysShowIfBelow(showLedIfBelowPct),
+                                          _lastShownTime(0)
+    {
+    }
+
+    void setup(int rp, int gp, int bp, float initialIntensity = 1.0f)
+    {
+        RGBLed::setup(rp, gp, bp, true, true, false);
+        setIntensity(initialIntensity);
+    }
+
+    void updateLED(int batteryPercent)
+    {
+        if (batteryPercent >= 99)
+        {
+            // Assuming it's charging. Flash the LED GREEN.
+            flashGreen();
+        }
+        else
+        {
+            // Linear fade from GREEN -> RED, through orange
+            int red[] = {200, 0, 0};
+            int green[] = {0, 200, 0};
+            float percent = batteryPercent;
+            setupSlerp(red, green, percent / 100.0f);
+        }
+
+        if (_showLevelForMs > 0)
+        {
+            float elapsedTime = millis() - _lastShownTime;
+            bool ledEnabled = elapsedTime < _showLevelForMs || batteryPercent <= _alwaysShowIfBelow;
+            if (ledEnabled != isEnabled())
+            {
+                setEnabled(ledEnabled);
+#ifdef DEBUG_MONITOR_BATTERY
+                if (ledEnabled)
+                {
+                    Serial.println("Enable battery LED...");
+                }
+                else
+                {
+                    Serial.printf("Disabled battery LED as > %dms has passed\n", _showLevelForMs);
+                }
+#endif
+            }
+        }
+
+        doAnimations();
+#ifdef DEBUG_BATTERY_RGB_PIXEL
+        Serial.printf("Lipo RGBColor r: %d, g: %d, b:%d, i:%2.2f\n", r, g, b, getIntensity());
+#endif
+        writeRGBColor();
+    }
+
+    void registerActivity()
+    {
+        _lastShownTime = millis();
+    }
+
+  private:
     void flashGreen(unsigned long duration = 2000)
     {
         if (mode != MODE_FLASH)
@@ -52,12 +165,12 @@ struct Pixel
         }
     }
 
-    void setupSlerp(int *fromPixel, int *toPixel, float currentPercent)
+    void setupSlerp(int *fromRGBColor, int *toRGBColor, float currentPercent)
     {
         if (mode != MODE_SLERP)
         {
-            fromSlerp = fromPixel;
-            toSlerp = toPixel;
+            fromSlerp = fromRGBColor;
+            toSlerp = toRGBColor;
             mode = MODE_SLERP;
         }
 
@@ -65,7 +178,7 @@ struct Pixel
         slerpPercent = currentPercent;
     }
 
-    void update()
+    void doAnimations()
     {
         if (mode == MODE_FLASH)
         {
@@ -81,10 +194,6 @@ struct Pixel
                 _slerp(fromSlerp[1], toSlerp[1], slerpPercent),
                 _slerp(fromSlerp[2], toSlerp[2], slerpPercent));
         }
-
-#ifdef DEBUG_BATTERY_RGB_PIXEL
-        Serial.printf("Pixel r: %d, g: %d, b:%d\n", r, g, b);
-#endif
     }
 
     int _slerp(int from, int to, float pct)
@@ -93,57 +202,17 @@ struct Pixel
         return from + ((to - from) * ramp_calc(pct, QUADRATIC_INOUT));
     }
 
-  private:
+    int _showLevelForMs = 10000;
+    unsigned int _alwaysShowIfBelow = 10;
+    unsigned long _lastShownTime = 0;
+
     RampMode mode;
     rampInt rgbRamps[3];
 
     // slerp
-    int *fromSlerp;
-    int *toSlerp;
-    float slerpPercent;
-};
-
-class RGBLed
-{
-  public:
-    RGBLed() : _intensity(1.0), _enabled(true) {}
-
-    void setup(int rp, int gp, int bp)
-    {
-        redPin = rp;
-        greenPin = gp;
-        bluePin = bp;
-        pinMode(redPin, OUTPUT);
-        pinMode(greenPin, OUTPUT);
-        pinMode(bluePin, OUTPUT);
-    }
-
-    void setIntensity(float val)
-    {
-        _intensity = val;
-    }
-
-    void setEnabled(bool flag)
-    {
-        _enabled = flag;
-    }
-
-    bool isEnabled() {
-        return _enabled;
-    }
-
-    void writePixel(Pixel &pixel)
-    {
-        float actualIntensity = _enabled ? _intensity : 0;
-        analogWrite(redPin, pixel.r * actualIntensity);
-        analogWrite(greenPin, pixel.g * actualIntensity);
-        analogWrite(bluePin, pixel.b * actualIntensity);
-    }
-
-  private:
-    int redPin, greenPin, bluePin;
-    float _intensity;
-    float _enabled;
+    int *fromSlerp = 0;
+    int *toSlerp = 0;
+    float slerpPercent = 0;
 };
 
 #endif

@@ -6,31 +6,15 @@
 #include "buttonplate.h"
 #include "battery.h"
 #include "power.h"
+#include "mypixel.h"
 
-PowerSwitch powerSwitch(POWER_SWITCH_TURNS_ON_IF_HELD_FOR_MS, AUTO_TURNOFF_IF_NO_ACTIVITY_MS);
 SWBButtonPlate plate;
-DoomBatteryMonitor batteryMonitor(VBATPIN, (int *)&BATTERY_LED_PIN[0], 1000, MOCK_BATTERY, SHOW_BATTERY_FOR_MS, POWER_LED_ALWAYS_SHOWS_IF_BELOW_PCT);
-
-void plateButtonPressed(int buttonNumber, KeyState state)
-{
-#ifdef DEBUG
-  String msg = state == PRESSED ? "Pressed" : "Released";
-  Serial.print(msg);
-  Serial.printf(" button number %d\n", buttonNumber);
-#endif
-
-  if (POWER_BTN_SHORT_PRESS_TO_SHOW_BATTERY_LEVEL)
-  {
-    if (buttonNumber == POWER_BTN_SHORT_PRESS_BUTTON_NUMBER && state == HOLD)
-    {
-      batteryMonitor.showLED();
-    }
-  }
-}
+PowerSwitch powerSwitch(AUTO_TURNOFF_IF_NO_ACTIVITY_MS);
+BatteryLevelReader batteryMonitor(VBATPIN, 1000, MOCK_BATTERY);
+LipoLed batteryLED(SHOW_BATTERY_FOR_MS, POWER_LED_ALWAYS_SHOWS_IF_BELOW_PCT);
 
 void setup()
 {
-
 #ifdef DEBUG
   Serial.begin(115200);
   while (!Serial)
@@ -48,8 +32,6 @@ void setup()
   plate.setupButtonPlate();
   plate.setButtonPressCallback(plateButtonPressed);
 
-  batteryMonitor.setup();
-
   // only attempts to control the mosfet if the gate pin is set.
   // it'll still do other stuff, like wait for inactivity and sleep the device
   if (USE_POWER_SWITCH)
@@ -58,15 +40,52 @@ void setup()
   }
 
   powerSwitch.setup();
+#ifdef DEBUG
+  Serial.println("Setup battery monitor...");
+#endif
+  batteryMonitor.setMonitorCallback(batteryLevelChanged);
+#ifdef DEBUG
+  Serial.println("Setup battery led...");
+#endif
+  batteryLED.setup(BATTERY_LED_PIN[0], BATTERY_LED_PIN[1], BATTERY_LED_PIN[2], MONITOR_LED_INTENSITY);
+
+#ifdef DEBUG
+  Serial.println("Setup complete");
+#endif
 }
 
+void batteryLevelChanged(BatteryLevelReader *reader, int level)
+{
+#ifdef DEBUG_BATTERY_NOTIFICATIONS
+  Serial.printf("Battery level at: %d\n", level);
+#endif
+  plate.notifyNewBatteryLevel(level);
+}
+
+void plateButtonPressed(int buttonNumber, KeyState state)
+{
+#ifdef DEBUG
+  String msg = state == PRESSED ? "Pressed" : "Released";
+  Serial.print(msg);
+  Serial.printf(" button number %d\n", buttonNumber);
+#endif
+
+  if (POWER_BTN_SHORT_PRESS_TO_SHOW_BATTERY_LEVEL)
+  {
+    if (buttonNumber == POWER_BTN_SHORT_PRESS_BUTTON_NUMBER && state == HOLD)
+    {
+      batteryLED.registerActivity();
+    }
+  }
+}
+
+static int loopCounter = 0;
+static int packetCounter = 0;
+static int lastLoopCountTime = 0;
+static int backoffAmount = 0;
 void loop()
 {
-  if (batteryMonitor.monitor())
-  {
-    plate.notifyNewBatteryLevel(batteryMonitor.lastBatteryPercent());
-  }
-
+  unsigned long startOfLoopMillis = millis();
   bool sendNewState = false || ALWAYS_SEND_STATE;
 
   // check buttons
@@ -80,13 +99,35 @@ void loop()
   // Use this to also tell the power switch that the device is in use
   powerSwitch.maybeTurnOnOrOff(sendNewState);
 
+  // Monitor battery levels. Callback is fired if it's changed.
+  // The level is then set to the plate (it sends it over BLE).
+  // The LED is updated all the time, to assure animations!
+  batteryMonitor.monitor();
+  batteryLED.updateLED(batteryMonitor.lastBatteryPercent());
+
   if (sendNewState)
   {
     plate.sendInputs();
+    packetCounter++;
   }
 
   if (__loopDelayInMs > 0)
   {
-    delay(__loopDelayInMs);
+    unsigned long loopTime = millis() - startOfLoopMillis;
+    if (loopTime < __loopDelayInMs)
+    {
+      delay(__loopDelayInMs - loopTime);
+    }
   }
+
+#ifdef DEBUG_LOOPS_PER_SECOND
+  loopCounter++;
+  if (startOfLoopMillis - lastLoopCountTime > 1000)
+  {
+    Serial.printf("Loops per second: %d. Packets per second: %d\n", loopCounter, packetCounter);
+    loopCounter = 0;
+    packetCounter = 0;
+    lastLoopCountTime = startOfLoopMillis;
+  }
+#endif
 }

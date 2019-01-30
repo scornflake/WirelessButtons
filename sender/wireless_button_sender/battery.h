@@ -1,41 +1,37 @@
-#include "vars.h"
-#include "mypixel.h"
 
 #define VBAT_MV_PER_LSB (0.73242188F) // 3.0V ADC range and 12-bit ADC resolution = 3000mV/4096
 #define VBAT_DIVIDER (0.71275837F)    // 2M + 0.806M voltage divider on VBAT = (2M / (0.806M + 2M))
 #define VBAT_DIVIDER_COMP (1.403F)    // Compensation factor for the VBAT divider
 
-class DoomBatteryMonitor
+class BatteryLevelReader;
+
+typedef void (*battery_level_changed_t)(BatteryLevelReader *reader, int currntPercent);
+
+class BatteryLevelReader
 {
   public:
-    DoomBatteryMonitor(int vBatPin, int *rgbPins, int checkIntervalInMs = 2000, bool mockBattVolts = false, int showForMs = 0, int showLedIfBelowPct = 20) : _vBatPin(vBatPin), _mockBattVolts(mockBattVolts), _checkIntervalInMs(checkIntervalInMs), _showLevelForMs(showForMs), _alwaysShowIfBelow(showLedIfBelowPct)
+    BatteryLevelReader(int vBatPin,
+                       int checkIntervalInMs = 2000,
+                       bool mockBattVolts = false) : _vBatPin(vBatPin),
+                                                     _mockBattVolts(mockBattVolts),
+                                                     _checkIntervalInMs(checkIntervalInMs)
+
     {
-        _pins[0] = rgbPins[0];
-        _pins[1] = rgbPins[1];
-        _pins[2] = rgbPins[2];
         _lastBatteryPercent = 0;
         _lastMonitorTime = 0;
         _lastPollTime = 0;
-        _lastShownTime = 0;
+        _levelChangedCallback = 0;
     }
 
-    void setup()
-    {
-        batteryLED.setup(_pins[0], _pins[1], _pins[2]);
-        batteryLED.setIntensity(MONITOR_LED_INTENSITY);
-    }
-
-    uint8_t lastBatteryPercent()
-    {
-        return _lastBatteryPercent;
-    }
+    uint8_t lastBatteryPercent() { return _lastBatteryPercent; }
+    void setMonitorCallback(battery_level_changed_t cb) { _levelChangedCallback = cb; }
 
     bool monitor()
     {
         bool batteryValueChanged = false;
         if (MONITOR_BATTERY)
         {
-            // Run to get enough for animation, but not much more... 30fps max.
+            // Run to get enough for animation of the mock, but not much more... 30fps max.
             unsigned long elapsedTime = millis() - _lastMonitorTime;
             if (elapsedTime < 33)
             {
@@ -61,60 +57,18 @@ class DoomBatteryMonitor
             {
                 _lastBatteryPercent = currentPercent;
                 batteryValueChanged = true;
-#ifdef DEBUG_MONITOR_BATTERY
-                Serial.printf("Battery Voltage: %d%%\n", _lastBatteryPercent);
-#endif
             }
 
-            updateLED();
             _lastMonitorTime = millis();
         }
-        return batteryValueChanged;
-    }
-
-    void showLED()
-    {
-        _lastShownTime = millis();
-    }
-
-    void updateLED()
-    {
-        if (_lastBatteryPercent >= 99)
+        if (batteryValueChanged)
         {
-            // Assuming it's charging. Flash the LED GREEN.
-            batteryPixel.flashGreen();
-        }
-        else
-        {
-            // Linear fade from GREEN -> RED, through orange
-            int red[] = {200, 0, 0};
-            int green[] = {0, 200, 0};
-            float percent = _lastBatteryPercent;
-            batteryPixel.setupSlerp(red, green, percent / 100.0f);
-        }
-
-        if (_showLevelForMs > 0)
-        {
-            float elapsedTime = millis() - _lastShownTime;
-            bool ledEnabled = elapsedTime < _showLevelForMs || _lastBatteryPercent <= _alwaysShowIfBelow;
-            if (ledEnabled != batteryLED.isEnabled())
+            if (_levelChangedCallback != 0)
             {
-                batteryLED.setEnabled(ledEnabled);
-#ifdef DEBUG_MONITOR_BATTERY
-                if (ledEnabled)
-                {
-                    Serial.println("Enable battery LED...");
-                }
-                else
-                {
-                    Serial.printf("Disabled battery LED as > %dms has passed\n", _showLevelForMs);
-                }
-#endif
+                _levelChangedCallback(this, _lastBatteryPercent);
             }
         }
-
-        batteryPixel.update();
-        batteryLED.writePixel(batteryPixel);
+        return batteryValueChanged;
     }
 
     uint8_t batteryLevelInPercent()
@@ -189,15 +143,10 @@ class DoomBatteryMonitor
     }
 
     int _vBatPin;
-    int _pins[3];
     int _checkIntervalInMs;
-    int _showLevelForMs;
-    unsigned long _lastShownTime;
     unsigned long _lastPollTime;
     unsigned long _lastMonitorTime;
-    unsigned int _alwaysShowIfBelow;
     uint8_t _lastBatteryPercent = 0.0;
     bool _mockBattVolts = false;
-    RGBLed batteryLED;
-    Pixel batteryPixel;
+    battery_level_changed_t _levelChangedCallback = 0;
 };

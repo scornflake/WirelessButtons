@@ -8,6 +8,8 @@
                 "C:\\Users\\neil\\Documents\\Arduino\\libraries\\**",
                 "C:\\Users\\neil\\AppData\\Local\\Arduino15\\packages\\adafruit\\tools\\**",
                 "C:\\Users\\neil\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\nrf52\\0.9.2\\**",
+                "/Users/neil/Documents/Arduino//libraries/**",
+                "/Users/neil/Library/Arduino15/**/libraries/**",
                 "${workspaceFolder}/**",
                 "C:/Users/neil/AppData/Local/Arduino15/packages/adafruit/hardware/nrf52/0.9.2/libraries/Bluefruit52Lib/src"
             ],

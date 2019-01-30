@@ -7,9 +7,8 @@
 class PowerSwitch
 {
   public:
-    PowerSwitch(unsigned long turnOnTimeInMS, unsigned long turnOffAfterMS)
+    PowerSwitch(unsigned long turnOffAfterMS)
         : _gatePin(-1),
-          _turnOnTimeMs(turnOnTimeInMS),
           _turnOffAfterMs(turnOffAfterMS)
     {
         _firstTime = true;
@@ -26,8 +25,10 @@ class PowerSwitch
         if (canDoPowerManagement())
         {
             pinMode(_gatePin, OUTPUT);
+            // pull high immediately
+            digitalWrite(_gatePin, HIGH);
         }
-        _isPowerTurnedOn = false;
+        _isPowerTurnedOn = true;
         _startTime = millis();
         _lastActivityTime = _startTime;
     }
@@ -38,31 +39,11 @@ class PowerSwitch
 
     void maybeTurnOnOrOff(bool seenActivity)
     {
-
         if(!canDoPowerManagement()) {
             return;
         }
 
         unsigned long rightNow = millis();
-
-        // Has the user held the button for a while?
-        // If so, we turn on the mosfet, to hold power up.
-        unsigned long elapsedTime = rightNow - _startTime;
-
-        if (elapsedTime > _turnOnTimeMs && !_isPowerTurnedOn && _firstTime)
-        {
-            if (canDoPowerManagement())
-            {
-                digitalWrite(_gatePin, HIGH);
-            }
-            _firstTime = false;
-            _isPowerTurnedOn = true;
-            _lastActivityTime = rightNow;
-#ifdef DEBUG_POWER_SWITCH
-            Serial.printf("We have been on for %dms. We're on!  Will turn off if no activity after %dms.\n", _turnOnTimeMs, _turnOffAfterMs);
-#endif
-        }
-
         if (_isPowerTurnedOn)
         {
             // Update when we last saw something happen
@@ -109,7 +90,6 @@ class PowerSwitch
     bool _isPowerTurnedOn;
     bool _firstTime;
     unsigned long _startTime;
-    unsigned long _turnOnTimeMs;
     unsigned long _turnOffAfterMs;
     unsigned long _lastActivityTime;
 
