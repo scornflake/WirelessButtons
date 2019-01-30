@@ -248,7 +248,8 @@ private:
     // Advertising packet
     Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
     Bluefruit.Advertising.addTxPower();
-    Bluefruit.Advertising.addAppearance(BLE_APPEARANCE_HID_GAMEPAD);
+//    Bluefruit.Advertising.addAppearance(BLE_APPEARANCE_HID_GAMEPAD);
+    Bluefruit.Advertising.addAppearance(BLE_APPEARANCE_HID_JOYSTICK);
 
     // Include BLE HID services
     Bluefruit.Advertising.addService(hid);
