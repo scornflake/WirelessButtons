@@ -29,7 +29,8 @@ class PowerSwitch
             digitalWrite(_gatePin, LOW);
 #ifdef DEBUG_POWER_SWITCH
         Serial.printf("Set pin %d LOW to enable the FET\n", _gatePin);
-#endif          }
+#endif
+        }
         _isPowerTurnedOn = true;
         _startTime = millis();
         _lastActivityTime = _startTime;
