@@ -59,7 +59,7 @@ public:
     Bluefruit.begin();
 
     // HID Device can have a min connection interval of 9*1.25 = 11.25 ms
-    Bluefruit.setConnInterval(9, 16); // min = 9*1.25=11.25 ms, max = 16*1.25=20ms
+    //Bluefruit.setConnInterval(9, 16); // min = 9*1.25=11.25 ms, max = 16*1.25=20ms
 
 #ifdef DO_NOT_SHOW_BLUE_LED
     // off Blue LED for lowest power consumption

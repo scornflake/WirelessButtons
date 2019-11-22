@@ -60,7 +60,7 @@ class SWBButtonHid : public BLEHidGeneric
         Serial.println(" in length");
 #endif
         // Attempt to change the connection interval to 11.25-15 ms when starting HID
-        Bluefruit.setConnInterval(9, 12);
+        //Bluefruit.setConnInterval(9, 12);
         return ERROR_NONE;
     }
 

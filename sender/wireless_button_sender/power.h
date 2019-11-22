@@ -19,21 +19,28 @@ class PowerSwitch
         if (_turnOffAfterMs > 0)
         {
 #ifdef DEBUG_POWER_SWITCH
-            Serial.printf("Will turn off automatically in %dms\n", _turnOffAfterMs);
+            Serial.printf("Will turn off automatically in %dms using gate pin: %d\n", _turnOffAfterMs, _gatePin);
 #endif
         }
         if (canDoPowerManagement())
         {
             pinMode(_gatePin, OUTPUT);
-            // pull high immediately
-            digitalWrite(_gatePin, HIGH);
-        }
+            // pull low immediately, to switch on the FET (assuming P channel)
+            digitalWrite(_gatePin, LOW);
+#ifdef DEBUG_POWER_SWITCH
+        Serial.printf("Set pin %d LOW to enable the FET\n", _gatePin);
+#endif          }
         _isPowerTurnedOn = true;
         _startTime = millis();
         _lastActivityTime = _startTime;
     }
 
-    void setGatePin(uint8_t pin) { _gatePin = pin; }
+    void setGatePin(uint8_t pin) { 
+        _gatePin = pin; 
+#ifdef DEBUG_POWER_SWITCH
+        Serial.printf("Using pin %d as the gate pin\n", pin);
+#endif        
+    }
 
     bool canDoPowerManagement() { return _gatePin >= 0; }
 
@@ -74,7 +81,12 @@ class PowerSwitch
         // If using the mosfet, do a hard power off
         if (canDoPowerManagement())
         {
-            digitalWrite(_gatePin, LOW);
+            // Switching to HIGH in a P channel FET turns the circuit off
+#ifdef DEBUG_POWER_SWITCH
+            Serial.println("Switching self off...");
+            delay(10); // to allow serial to write
+#endif
+            digitalWrite(_gatePin, HIGH);
         }
         else
         {

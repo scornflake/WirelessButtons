@@ -36,19 +36,19 @@
 const bool USE_POWER_SWITCH = true;
 
 // Specify the next 3 values, to setup the gate and timeout periods
-const int POWER_SWITCH_GATE_PIN = 25;                  // the pin connected to the gate of the mosfet
+const int POWER_SWITCH_GATE_PIN = 16;                  // the pin connected to the gate of the mosfet
 const int AUTO_TURNOFF_MINUTES = 15;                   // How many minutes to wait with no activity, until turning off?
 const int POWER_SWITCH_TURNS_ON_IF_HELD_FOR_MS = 1000; // must hold power switch for 2s to turn on wheel
 
 const int POWER_BTN_SHORT_PRESS_BUTTON_NUMBER = 3;             // The button that when held will trigger showing batt level
 const bool POWER_BTN_SHORT_PRESS_TO_SHOW_BATTERY_LEVEL = true; // You can short press the button to show the current batt level
-const int POWER_LED_ALWAYS_SHOWS_IF_BELOW_PCT = 20;            // always show the LED if power drops below this figure
+const int POWER_LED_ALWAYS_SHOWS_IF_BELOW_PCT = 50;            // always show the LED if power drops below this figure
 
 // this one? well. Yeh. Leave it.
 #ifdef DEBUG
-const int AUTO_TURNOFF_IF_NO_ACTIVITY_MS = 10000;
+const unsigned long AUTO_TURNOFF_IF_NO_ACTIVITY_MS = 3000;
 #else
-const int AUTO_TURNOFF_IF_NO_ACTIVITY_MS = (60 * AUTO_TURNOFF_MINUTES * 1000); // cos I like constants.
+const unsigned long  AUTO_TURNOFF_IF_NO_ACTIVITY_MS = (60 * AUTO_TURNOFF_MINUTES * 1000); // cos I like constants.
 #endif
 
 /* Battery Monitoring */
@@ -68,7 +68,6 @@ const int NUMBER_OF_BUTTONS = 16;
 
 // Send state every time through loop()
 // Originally put in place to debug why some switch operations were missed @ Windows.
-// Apparently how
 const bool ALWAYS_SEND_STATE = false;
 
 // Our wheel has 16 buttons and 2 encoders (they take 4 inputs)
@@ -109,10 +108,9 @@ const int __loopDelayInMs = 00;
 
 /* TODO: How to put in a compiler warning if NUM_HID_INPUTS not a multiple of 8???? */
 
-typedef ATTR_PACKED_STRUCT(struct)
+typedef struct __attribute__((__packed__)) 
 {
     uint8_t buttons[NUMBER_OF_BUTTON_BYTES];
-}
-hid_button_masher_t;
+} hid_button_masher_t;
 
 #endif
